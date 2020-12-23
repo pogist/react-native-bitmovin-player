@@ -3,16 +3,17 @@
 #import <React/RCTBridgeModule.h>
 
 @interface RCT_EXTERN_MODULE(ReactNativeBitmovinPlayer, RCTViewManager)
-  RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL)
-  RCT_EXPORT_VIEW_PROPERTY(filename, NSString)
-//  RCT_EXPORT_VIEW_PROPERTY(width, CGFloat)
-//  RCT_EXPORT_VIEW_PROPERTY(height, CGFloat)
-
 
 RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(play)
+
+RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(onLoad, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onPlay, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onPause, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(configuration, NSDictionary);
 
 @end

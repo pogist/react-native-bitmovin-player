@@ -1,9 +1,17 @@
 import { requireNativeComponent, NativeModules } from 'react-native';
+import React from 'react';
 
 type ReactNativeBitmovinPlayerType = {
-  style: any;
   autoPlay: boolean;
-  filename: string;
+  style?: any;
+  onLoad?: (event: any) => void;
+  onPlay?: (event: any) => void;
+  onPause?: (event: any) => void;
+  configuration: {
+    url: string;
+    poster: string;
+    subtitles?: string;
+  };
 };
 
 type ReactNativeBitmovinPlayerMethodsType = {
@@ -17,12 +25,25 @@ const {
   ReactNativeBitmovinPlayer: ReactNativeBitmovinPlayerIntance,
 }: ReactNativeBitmovinPlayerMethodsType = NativeModules as ReactNativeBitmovinPlayerMethodsType;
 
-// export default ReactNativeBitmovinPlayer as ReactNativeBitmovinPlayerType;
-
 const ReactNativeBitmovinPlayer = requireNativeComponent<ReactNativeBitmovinPlayerType>(
   'ReactNativeBitmovinPlayer'
 );
 
 export { ReactNativeBitmovinPlayerIntance };
 
-export default ReactNativeBitmovinPlayer;
+export default ({
+  autoPlay,
+  style,
+  onLoad,
+  onPlay,
+  onPause,
+  configuration,
+}: ReactNativeBitmovinPlayerType) => {
+  const styles = { flex: 1, width: '100%', height: '100%' };
+  return (
+    <ReactNativeBitmovinPlayer
+      {...{ autoPlay, onLoad, onPlay, onPause, configuration }}
+      style={[styles, style]}
+    />
+  );
+};

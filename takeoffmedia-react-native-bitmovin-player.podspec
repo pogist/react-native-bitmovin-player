@@ -20,5 +20,4 @@ Pod::Spec.new do |s|
 
   s.dependency "BitmovinPlayer", "2.57.1"
 
-  s.dependency "PlayerKit"
 end

@@ -71,7 +71,6 @@ PODS:
   - OpenSSL-Universal (1.0.2.20):
     - OpenSSL-Universal/Static (= 1.0.2.20)
   - OpenSSL-Universal/Static (1.0.2.20)
-  - PlayerKit (2.0.0)
   - RCTRequired (0.63.4)
   - RCTTypeSafety (0.63.4):
     - FBLazyVector (= 0.63.4)
@@ -298,9 +297,8 @@ PODS:
     - React-Core (= 0.63.4)
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
-  - takeoffmedia-react-native-bitmovin-player (0.1.0):
+  - takeoffmedia-react-native-bitmovin-player (0.1.4):
     - BitmovinPlayer (= 2.57.1)
-    - PlayerKit
     - React-Core
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
@@ -372,7 +370,6 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - OpenSSL-Universal
-    - PlayerKit
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -449,7 +446,6 @@ SPEC CHECKSUMS:
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
-  PlayerKit: cacafe8ef15294e2280d002a5c71faf07947a1a9
   RCTRequired: 082f10cd3f905d6c124597fd1c14f6f2655ff65e
   RCTTypeSafety: 8c9c544ecbf20337d069e4ae7fd9a377aadf504b
   React: b0a957a2c44da4113b0c4c9853d8387f8e64e615
@@ -470,7 +466,7 @@ SPEC CHECKSUMS:
   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
-  takeoffmedia-react-native-bitmovin-player: b4a621466993af07c2ae829410ef1c341b83241e
+  takeoffmedia-react-native-bitmovin-player: ddbd01670b72698f5c879bec2db983db708b8373
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 

@@ -22,17 +22,21 @@ export default function App() {
       <ReactNativeBitmovinPlayer
         autoPlay={false}
         configuration={{
+          // url:
+          //   'https://vod-hls-ntham-comm-live.bbccomm.s.llnwi.net/usp/auth/vod/piff_abr_full_sd/3c71d6-p04yhx89/vf_p04yhx89_b482950e-e543-41f6-bd25-5efd49756735.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?s=1608731574&e=1608774774&h=a263a7cc9007ce30655f86b31d9c9c9c',
           url:
-            'https://vod-hls-ntham-comm-live.bbccomm.s.llnwi.net/usp/auth/vod/piff_abr_full_sd/3c71d6-p04yhx89/vf_p04yhx89_b482950e-e543-41f6-bd25-5efd49756735.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?s=1608731574&e=1608774774&h=a263a7cc9007ce30655f86b31d9c9c9c',
+            'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
           poster:
             'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
           subtitles:
             'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+          thumbnails:
+            'https://staging-api.britbox.takeoffmedia.com/v1/thumbnail?qs=P19fZ2RhX189MTYwOTg3ODc4OV9kMzcwZjRjZjA3MWFiOTlkN2QxYWQ0ZjNjMjczOWQ1YQ==&fn=L3RodW1ibmFpbF92MS82YTBiMTYtcGlwcy1waWQtcDA4OTFmc3QvdmZfcGlwcy1waWQtcDA4OTFmc3RfdGh1bWJuYWlsX21hbmlmZXN0X2E2ZmMxNjNiLWIxNjctNDNkOS1iZjBkLWFjOWZkNTJlNjJkMC54bWw=&ch=vod-thumb-ntham-comm-live.akamaized.net',
         }}
         onLoad={() => {
           console.log({ event: 'load' });
         }}
-        onPlay={() => {
+        onPlaying={() => {
           console.log({ event: 'play' });
         }}
         onPause={() => {

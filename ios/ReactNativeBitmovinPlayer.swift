@@ -26,5 +26,9 @@ class ReactNativeBitmovinPlayer: RCTViewManager {
 //        playerView.play()
     }
 
+    @objc(onClose)
+    func onClose() -> Void {
+        playerView.onClose();
+    }
 
 }

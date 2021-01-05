@@ -33,6 +33,10 @@ final class ViewController: UIView {
               language: "en")
             config.sourceItem?.add(subtitleTrack: subtitleTrack)
         }
+        if((self.configuration!["thumbnails"]) != nil) {
+            let thumbnailsTrack = ThumbnailTrack(url: URL(string: self.configuration!["thumbnails"] as! String)!, label: "thumbnails", identifier: "thumbnails", isDefaultTrack: true)
+            config.sourceItem?.thumbnailTrack = thumbnailsTrack;
+        }
         player?.setup(configuration: config)
         if (self.autoPlay == true){
             player?.play()
@@ -58,7 +62,7 @@ final class ViewController: UIView {
     }
 
     @objc var onLoad:RCTDirectEventBlock? = nil
-    @objc var onPlay:RCTDirectEventBlock? = nil
+    @objc var onPlaying:RCTDirectEventBlock? = nil
     @objc var onPause:RCTDirectEventBlock? = nil
 
     required init?(coder: NSCoder) {
@@ -80,14 +84,20 @@ final class ViewController: UIView {
 //            print("Configuration error: \(error)")
 //        }
 //    }
+
+    func onClose() -> Void {
+        if ((player) != nil) {
+            print("onClose")
+        }
+    }
 }
 
 extension ViewController: PlayerListener {
 
     func onPlay(_ event: PlayEvent) {
         print("onPlay \(event.time)")
-        if((self.onPlay) != nil) {
-            self.onPlay!(["message": "play"])
+        if((self.onPlaying) != nil) {
+            self.onPlaying!(["message": "play"])
         }
     }
 

@@ -9,10 +9,11 @@ RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(play)
+RCT_EXTERN_METHOD(onClose)
 
 RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(onLoad, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onPlay, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onPlaying, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPause, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(configuration, NSDictionary);
 

@@ -13,14 +13,33 @@ final class ViewController: UIView {
     @objc var configuration: NSDictionary? = nil
 
     var player: Player?
+    fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
     let config = PlayerConfiguration()
+    
+    /**
+     * Go to https://github.com/bitmovin/bitmovin-player-ui to get started with creating a custom player UI.
+     */
+    let cssURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.css")
+    
+    let jsURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.js")
+    
+    
+//    config.styleConfiguration.playerUiCss = cssURL
+//    config.styleConfiguration.playerUiJs = jsURL
+
+//    config.styleConfiguration.userInterfaceConfiguration = bitmovinUserInterfaceConfiguration
 
     deinit {
         player?.destroy()
     }
 
     override func didSetProps(_ changedProps: [String]!) {
+        config.styleConfiguration.playerUiJs = jsURL!
+        config.styleConfiguration.playerUiCss = cssURL!
+        
+        config.styleConfiguration.userInterfaceConfiguration = bitmovinUserInterfaceConfiguration
+            
         try! config.setSourceItem(url: URL.init(string: self.configuration!["url"] as! String)!)
         if((self.configuration!["poster"]) != nil) {
             config.sourceItem?.posterSource = URL.init(string: self.configuration!["poster"] as! String)!
@@ -68,22 +87,21 @@ final class ViewController: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    @IBAction fileprivate func toggleCloseButton(_ sender: Any) {
+        // Use the configured customMessageHandler to send messages to the UI
+        customMessageHandler?.sendMessage("toggleCloseButton")
+    }
 
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//
-//        self.view.backgroundColor = .black
-//
-//
-//        do {
-//            view.addSubview(playerView)
-//            view.bringSubviewToFront(playerView)
-//
-//            self.player = player
-//        } catch {
-//            print("Configuration error: \(error)")
-//        }
-//    }
+    fileprivate var bitmovinUserInterfaceConfiguration: BitmovinUserInterfaceConfiguration {
+        // Configure the JS <> Native communication
+        let bitmovinUserInterfaceConfiguration = BitmovinUserInterfaceConfiguration()
+        // Create an instance of the custom message handler
+        customMessageHandler = CustomMessageHandler()
+        customMessageHandler?.delegate = self
+        bitmovinUserInterfaceConfiguration.customMessageHandler = customMessageHandler
+        return bitmovinUserInterfaceConfiguration
+    }
 
     func onClose() -> Void {
         if ((player) != nil) {
@@ -91,6 +109,22 @@ final class ViewController: UIView {
         }
     }
 }
+
+// MARK: - CustomMessageHandlerDelegate
+extension ViewController: CustomMessageHandlerDelegate {
+    func receivedSynchronousMessage(_ message: String, withData data: String?) -> String? {
+        if message == "closePlayer" {
+//            dismiss(animated: true, completion: nil)
+        }
+
+        return nil
+    }
+
+    func receivedAsynchronousMessage(_ message: String, withData data: String?) {
+        print("received Asynchronouse Messagse", message, data ?? "")
+    }
+}
+
 
 extension ViewController: PlayerListener {
 

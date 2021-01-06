@@ -25,6 +25,7 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libReactNativeBitmovinPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libReactNativeBitmovinPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D98A46A2590E26800C94A99 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		5DCC489525A6272B00D37A96 /* Resources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Resources; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* ReactNativeBitmovinPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReactNativeBitmovinPlayer.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* ReactNativeBitmovinPlayer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ReactNativeBitmovinPlayer-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeBitmovinPlayer.swift; sourceTree = "<group>"; };
@@ -52,6 +53,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				5DCC489525A6272B00D37A96 /* Resources */,
 				5D98A46A2590E26800C94A99 /* PlayerView.swift */,
 				F4FF95D6245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift */,
 				B3E7B5891CC2AC0600A0062D /* ReactNativeBitmovinPlayer.m */,

@@ -37,7 +37,7 @@ final class ViewController: UIView {
         
         let jsURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.js")
         
-        let css = Bundle.main.url(forResource: "bitmovinplayer-ui", withExtension: "css")
+        let css = Bundle.main.url(forResource: "bitmovinplayer-ui", withExtension: "min.css")
         
         config.styleConfiguration.playerUiJs = jsURL!
         config.styleConfiguration.playerUiCss = css!

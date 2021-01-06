@@ -127,8 +127,7 @@
   },
   "eslintIgnore": [
     "node_modules/",
-    "lib/",
-    "ios/"
+    "lib/"
   ],
   "prettier": {
     "quoteProps": "consistent",

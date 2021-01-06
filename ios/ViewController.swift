@@ -20,9 +20,7 @@ final class ViewController: UIView {
     /**
      * Go to https://github.com/bitmovin/bitmovin-player-ui to get started with creating a custom player UI.
      */
-    let cssURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.css")
     
-    let jsURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.js")
     
     
 //    config.styleConfiguration.playerUiCss = cssURL
@@ -35,11 +33,17 @@ final class ViewController: UIView {
     }
 
     override func didSetProps(_ changedProps: [String]!) {
+//        let cssURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.css")
+        
+        let jsURL = URL.init(string: "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/bitmovinplayer-ui.min.js")
+        
+        let css = Bundle.main.url(forResource: "bitmovinplayer-ui", withExtension: "css")
+        
         config.styleConfiguration.playerUiJs = jsURL!
-        config.styleConfiguration.playerUiCss = cssURL!
+        config.styleConfiguration.playerUiCss = css!
         
         config.styleConfiguration.userInterfaceConfiguration = bitmovinUserInterfaceConfiguration
-            
+
         try! config.setSourceItem(url: URL.init(string: self.configuration!["url"] as! String)!)
         if((self.configuration!["poster"]) != nil) {
             config.sourceItem?.posterSource = URL.init(string: self.configuration!["poster"] as! String)!

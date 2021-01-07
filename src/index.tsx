@@ -7,6 +7,7 @@ type ReactNativeBitmovinPlayerType = {
   onLoad?: (event: any) => void;
   onPlaying?: (event: any) => void;
   onPause?: (event: any) => void;
+  onEvent?: (event: any) => void;
   configuration: {
     url: string;
     poster: string;
@@ -38,12 +39,20 @@ export default ({
   onLoad,
   onPlaying,
   onPause,
+  onEvent,
   configuration,
 }: ReactNativeBitmovinPlayerType) => {
   const styles = { flex: 1, width: '100%', height: '100%' };
   return (
     <ReactNativeBitmovinPlayer
-      {...{ autoPlay, onLoad, onPlaying, onPause, configuration }}
+      {...{
+        autoPlay,
+        onLoad,
+        onPlaying,
+        onPause,
+        onEvent,
+        configuration,
+      }}
       style={[styles, style]}
     />
   );

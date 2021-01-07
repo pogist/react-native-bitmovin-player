@@ -13,17 +13,11 @@ export default function App() {
     // ReactNativeBitmovinPlayerIntance.play();
   }, []);
 
-  // filename="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
-  // url:
-  //   'https://vod-hls-ntham-comm-live.bbccomm.s.llnwi.net/usp/auth/vod/piff_abr_full_sd/3c71d6-p04yhx89/vf_p04yhx89_b482950e-e543-41f6-bd25-5efd49756735.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?s=1608731574&e=1608774774&h=a263a7cc9007ce30655f86b31d9c9c9c',
-  // 'https://vod-sub-ww-live.akamaized.net/iplayer/subtitles/s_od_p004/modav/p04yhx89_58915a94-38bc-4a02-b9a7-15afa95fb583.cc.xml?__gda__=1608774774_15b84f438bb50927c10fffa34045d734',
   return (
     <View style={styles.container}>
       <ReactNativeBitmovinPlayer
         autoPlay={false}
         configuration={{
-          // url:
-          //   'https://vod-hls-ntham-comm-live.bbccomm.s.llnwi.net/usp/auth/vod/piff_abr_full_sd/3c71d6-p04yhx89/vf_p04yhx89_b482950e-e543-41f6-bd25-5efd49756735.ism/mobile_wifi_main_sd_abr_v2_hls_master.m3u8?s=1608731574&e=1608774774&h=a263a7cc9007ce30655f86b31d9c9c9c',
           url:
             'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
           poster:
@@ -41,6 +35,9 @@ export default function App() {
         }}
         onPause={() => {
           console.log({ event: 'pause' });
+        }}
+        onEvent={({ nativeEvent }) => {
+          console.log({ nativeEvent });
         }}
       />
     </View>

@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5DCC48FA25A6491800D37A96 /* bitmovinplayer-ui.min.js in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5DCC48F725A648D800D37A96 /* bitmovinplayer-ui.min.js */; };
-		5DCC48FB25A6491800D37A96 /* bitmovinplayer-ui.min.css in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5DCC48F825A648D800D37A96 /* bitmovinplayer-ui.min.css */; };
-		5DCC48FC25A6491800D37A96 /* bitmovinplayer-ui.css in CopyFiles */ = {isa = PBXBuildFile; fileRef = 5DCC48F925A648D800D37A96 /* bitmovinplayer-ui.css */; };
 		F4FF95D7245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift */; };
 /* End PBXBuildFile section */
 
@@ -20,9 +17,6 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 7;
 			files = (
-				5DCC48FA25A6491800D37A96 /* bitmovinplayer-ui.min.js in CopyFiles */,
-				5DCC48FB25A6491800D37A96 /* bitmovinplayer-ui.min.css in CopyFiles */,
-				5DCC48FC25A6491800D37A96 /* bitmovinplayer-ui.css in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -31,9 +25,6 @@
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libReactNativeBitmovinPlayer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libReactNativeBitmovinPlayer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D98A46A2590E26800C94A99 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
-		5DCC48F725A648D800D37A96 /* bitmovinplayer-ui.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = "bitmovinplayer-ui.min.js"; sourceTree = "<group>"; };
-		5DCC48F825A648D800D37A96 /* bitmovinplayer-ui.min.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = "bitmovinplayer-ui.min.css"; sourceTree = "<group>"; };
-		5DCC48F925A648D800D37A96 /* bitmovinplayer-ui.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = "bitmovinplayer-ui.css"; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* ReactNativeBitmovinPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ReactNativeBitmovinPlayer.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* ReactNativeBitmovinPlayer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ReactNativeBitmovinPlayer-Bridging-Header.h"; sourceTree = "<group>"; };
 		F4FF95D6245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeBitmovinPlayer.swift; sourceTree = "<group>"; };
@@ -61,7 +52,6 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				5DCC48F625A648D800D37A96 /* Resources */,
 				5D98A46A2590E26800C94A99 /* PlayerView.swift */,
 				F4FF95D6245B92E800C19C63 /* ReactNativeBitmovinPlayer.swift */,
 				B3E7B5891CC2AC0600A0062D /* ReactNativeBitmovinPlayer.m */,
@@ -69,16 +59,6 @@
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
-		};
-		5DCC48F625A648D800D37A96 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				5DCC48F725A648D800D37A96 /* bitmovinplayer-ui.min.js */,
-				5DCC48F825A648D800D37A96 /* bitmovinplayer-ui.min.css */,
-				5DCC48F925A648D800D37A96 /* bitmovinplayer-ui.css */,
-			);
-			path = Resources;
-			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 

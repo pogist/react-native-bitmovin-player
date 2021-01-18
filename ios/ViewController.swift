@@ -11,7 +11,7 @@ import BitmovinPlayer
 final class ViewController: UIView {
     @objc var autoPlay: Bool = false
     @objc var configuration: NSDictionary? = nil
-    
+
     var player: Player?
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
@@ -22,7 +22,7 @@ final class ViewController: UIView {
     }
 
     override func didSetProps(_ changedProps: [String]!) {
-        
+
         try! config.setSourceItem(url: URL.init(string: self.configuration!["url"] as! String)!)
         if((self.configuration!["poster"]) != nil) {
             config.sourceItem?.posterSource = URL.init(string: self.configuration!["poster"] as! String)!
@@ -39,7 +39,12 @@ final class ViewController: UIView {
             let thumbnailsTrack = ThumbnailTrack(url: URL(string: self.configuration!["thumbnails"] as! String)!, label: "thumbnails", identifier: "thumbnails", isDefaultTrack: true)
             config.sourceItem?.thumbnailTrack = thumbnailsTrack;
         }
-                
+
+       if((self.configuration!["startOffset"]) != nil) {
+            config.sourceItem?.options = SourceOptions();
+            config.sourceItem?.options?.startOffset = self.configuration!["startOffset"] as! TimeInterval;
+       }
+
         player?.setup(configuration: config)
         if (self.autoPlay == true){
             player?.play()
@@ -48,7 +53,7 @@ final class ViewController: UIView {
 
     override init(frame:CGRect) {
         super.init(frame: frame)
-        
+
         var plistDictionary: NSDictionary?
         if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
             plistDictionary = NSDictionary(contentsOfFile: path)
@@ -63,9 +68,9 @@ final class ViewController: UIView {
         if (plistDictionary!["BitmovinPlayerJs"] != nil) {
             config.styleConfiguration.playerUiJs = URL(string: plistDictionary!["BitmovinPlayerJs"] as! String)!
         }
-        
+
         config.styleConfiguration.userInterfaceConfiguration = bitmovinUserInterfaceConfiguration
-        
+
         // Create player based on player configuration
         player = Player(configuration: config)
 
@@ -77,7 +82,7 @@ final class ViewController: UIView {
 
         playerView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         playerView.frame = frame
-        
+
         playerView.add(listener: self)
 
         self.addSubview(playerView)
@@ -91,7 +96,7 @@ final class ViewController: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     @IBAction fileprivate func toggleCloseButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleCloseButton")
@@ -129,7 +134,7 @@ extension ViewController: UserInterfaceListener {
     func onControlsHide(_ event: ControlsHideEvent) {
         print("onControlsHide")
     }
-    
+
     func onControlsShow(_ event: ControlsShowEvent) {
         print("onControlsShow")
     }
@@ -143,8 +148,8 @@ extension ViewController: PlayerListener {
             self.onPlaying!(["message": "play"])
         }
     }
-    
-    
+
+
     func onReady(_ event: ReadyEvent) {
         print("onReady \(event.name)")
         if((self.onLoad) != nil) {

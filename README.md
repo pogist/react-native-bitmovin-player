@@ -6,6 +6,10 @@ npm install @takeoffmedia/react-native-bitmovin-player
 ```
 ## Project Setup
 
++ Add in your pod file:
+  + `source 'https://github.com/bitmovin/cocoapod-specs.git'`
+  + `pod 'BitmovinPlayer', '2.57.1'`
+
 +   Add your Bitmovin player license key to the `Info.plist` file as `BitmovinPlayerLicenseKey`.
 
 +   Add the Bundle identifier of the iOS application which is using the SDK as an allowed domain to the Bitmovin licensing backend. This can be also done under `Player -> Licenses` when logging in into [https://dashboard.bitmovin.com](https://dashboard.bitmovin.com) with your account.
@@ -40,6 +44,7 @@ import ReactNativeBitmovinPlayer from '@takeoffmedia/react-native-bitmovin-playe
     poster: '',
     subtitles: '',
     thumbnails: '',
+    startOffset: 0
   }}
 />
 

@@ -11,6 +11,7 @@ type ReactNativeBitmovinPlayerType = {
   configuration: {
     url: string;
     poster: string;
+    startOffset: number;
     subtitles?: string;
     thumbnails?: string;
   };

@@ -18,6 +18,7 @@ export default function App() {
       <ReactNativeBitmovinPlayer
         autoPlay={false}
         configuration={{
+          startOffset: 1000,
           url:
             'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
           poster:

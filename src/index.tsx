@@ -14,6 +14,9 @@ type ReactNativeBitmovinPlayerType = {
     startOffset: number;
     subtitles?: string;
     thumbnails?: string;
+    title?: string;
+    subtitle?: string;
+    nextPlayback?: number;
   };
 };
 

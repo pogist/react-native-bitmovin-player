@@ -13,6 +13,8 @@ final class ViewController: UIView {
     @objc var configuration: NSDictionary? = nil
 
     var player: Player?
+    var nextCallback: Bool = false
+
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
     let config = PlayerConfiguration()
@@ -40,12 +42,23 @@ final class ViewController: UIView {
             config.sourceItem?.thumbnailTrack = thumbnailsTrack;
         }
 
-       if((self.configuration!["startOffset"]) != nil) {
+        if((self.configuration!["startOffset"]) != nil) {
             config.sourceItem?.options = SourceOptions();
             config.sourceItem?.options?.startOffset = self.configuration!["startOffset"] as! TimeInterval;
-       }
+        }
+
+        if((self.configuration!["title"]) != nil) {
+            config.sourceItem?.itemTitle = self.configuration!["title"] as? String;
+        }
+
+        if((self.configuration!["subtitle"]) != nil) {
+            config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
+        }
 
         player?.setup(configuration: config)
+        
+        nextCallback = false;
+        
         if (self.autoPlay == true){
             player?.play()
         }
@@ -166,6 +179,13 @@ extension ViewController: PlayerListener {
 
     func onTimeChanged(_ event: TimeChangedEvent) {
         print("onTimeChanged \(event.currentTime) \(self.player?.duration ?? 0)")
+        
+        if (event.currentTime > (self.player?.duration ?? 0) - (self.configuration!["nextPlayback"] as! Double) && !nextCallback) {
+            if((self.onEvent) != nil) {
+                nextCallback = true;
+                self.onEvent!(["message": "next"])
+            }
+        }
     }
 
     func onDurationChanged(_ event: DurationChangedEvent) {

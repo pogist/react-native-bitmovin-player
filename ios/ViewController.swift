@@ -155,16 +155,16 @@ extension ViewController: UserInterfaceListener {
 extension ViewController: PlayerListener {
 
     func onPlay(_ event: PlayEvent) {
-        print("onPlay \(event.time)")
+        print("onPlay \(event.name)")
         if((self.onPlaying) != nil) {
             self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
         }
     }
 
     func onSeeked(_ event: SeekedEvent) {
-        print("onSeeked \(event.timestamp)")
+        print("onSeeked \(event.name) \(event.timestamp) \(self.player?.currentTime as Any)")
         if((self.onSeek) != nil) {
-            self.onSeek!(["message": "seek", "time": event.timestamp, "volume": self.player?.volume as Any])
+            self.onSeek!(["message": "seek", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
         }
     }
 

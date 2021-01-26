@@ -43,6 +43,9 @@ export default function App() {
         onEvent={({ nativeEvent }) => {
           console.log({ nativeEvent });
         }}
+        onSeek={({ nativeEvent }) => {
+          console.log({ nativeEvent });
+        }}
       />
     </View>
   );

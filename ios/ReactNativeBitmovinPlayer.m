@@ -15,6 +15,7 @@ RCT_EXPORT_VIEW_PROPERTY(onLoad, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onEvent, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPlaying, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPause, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onSeek, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(configuration, NSDictionary);
 
 @end

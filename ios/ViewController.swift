@@ -56,9 +56,7 @@ final class ViewController: UIView {
         }
 
         player?.setup(configuration: config)
-        
         nextCallback = false;
-        
         if (self.autoPlay == true){
             player?.play()
         }
@@ -105,6 +103,7 @@ final class ViewController: UIView {
     @objc var onPlaying:RCTDirectEventBlock? = nil
     @objc var onPause:RCTDirectEventBlock? = nil
     @objc var onEvent:RCTDirectEventBlock? = nil
+    @objc var onSeek:RCTDirectEventBlock? = nil
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -132,7 +131,7 @@ extension ViewController: CustomMessageHandlerDelegate {
     func receivedSynchronousMessage(_ message: String, withData data: String?) -> String? {
         print("onEvent =) \(message)")
         if((self.onEvent) != nil) {
-            self.onEvent!(["message": message])
+            self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
         }
 
         return nil
@@ -158,7 +157,14 @@ extension ViewController: PlayerListener {
     func onPlay(_ event: PlayEvent) {
         print("onPlay \(event.time)")
         if((self.onPlaying) != nil) {
-            self.onPlaying!(["message": "play"])
+            self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
+        }
+    }
+
+    func onSeeked(_ event: SeekedEvent) {
+        print("onSeeked \(event.timestamp)")
+        if((self.onSeek) != nil) {
+            self.onSeek!(["message": "seek", "time": event.timestamp, "volume": self.player?.volume as Any])
         }
     }
 
@@ -166,20 +172,19 @@ extension ViewController: PlayerListener {
     func onReady(_ event: ReadyEvent) {
         print("onReady \(event.name)")
         if((self.onLoad) != nil) {
-            self.onLoad!(["message": "load"])
+            self.onLoad!(["message": "load", "volume": self.player?.volume as Any])
         }
     }
 
     func onPaused(_ event: PausedEvent) {
         print("onPaused \(event.time)")
         if((self.onPause) != nil) {
-            self.onPause!(["message": "pause"])
+            self.onPause!(["message": "pause", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
         }
     }
 
     func onTimeChanged(_ event: TimeChangedEvent) {
         print("onTimeChanged \(event.currentTime) \(self.player?.duration ?? 0)")
-        
         if (event.currentTime > (self.player?.duration ?? 0) - (self.configuration!["nextPlayback"] as! Double) && !nextCallback) {
             if((self.onEvent) != nil) {
                 nextCallback = true;

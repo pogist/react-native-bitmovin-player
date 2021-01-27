@@ -22,6 +22,7 @@ export default function App() {
           subtitle: 'S1 · E1',
           startOffset: 1000,
           nextPlayback: 30,
+          hasNextEpisode: false,
           url:
             'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
           poster:

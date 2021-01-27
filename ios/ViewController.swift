@@ -50,6 +50,14 @@ final class ViewController: UIView {
         if((self.configuration!["title"]) != nil) {
             config.sourceItem?.itemTitle = self.configuration!["title"] as? String;
         }
+        
+        if((self.configuration!["hasNextEpisode"]) != nil) {
+            config.sourceItem?.metadata.addEntries(from: ["hasNextEpisode": self.configuration!["hasNextEpisode"] as! Bool])
+        }
+        
+        if((self.configuration!["advisory"]) != nil) {
+            config.sourceItem?.metadata.addEntries(from: ["advisory": self.configuration!["advisory"] as Any])
+        }
 
         if((self.configuration!["subtitle"]) != nil) {
             config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
@@ -112,6 +120,11 @@ final class ViewController: UIView {
     @IBAction fileprivate func toggleCloseButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleCloseButton")
+    }
+    
+    @IBAction fileprivate func nextEpisodeButton(_ sender: Any) {
+        // Use the configured customMessageHandler to send messages to the UI
+        customMessageHandler?.sendMessage("nextEpisodeButton")
     }
 
     fileprivate var bitmovinUserInterfaceConfiguration: BitmovinUserInterfaceConfiguration {

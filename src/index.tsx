@@ -13,11 +13,16 @@ type ReactNativeBitmovinPlayerType = {
     url: string;
     poster: string;
     startOffset: number;
+    hasNextEpisode: boolean;
     subtitles?: string;
     thumbnails?: string;
     title?: string;
     subtitle?: string;
     nextPlayback?: number;
+    advisory?: {
+      classification: string;
+      description: string;
+    };
   };
 };
 

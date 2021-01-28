@@ -112,7 +112,9 @@ final class ViewController: UIView {
     @objc var onPause:RCTDirectEventBlock? = nil
     @objc var onEvent:RCTDirectEventBlock? = nil
     @objc var onSeek:RCTDirectEventBlock? = nil
-
+    @objc var onForward:RCTDirectEventBlock? = nil
+    @objc var onRewind:RCTDirectEventBlock? = nil
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -120,6 +122,16 @@ final class ViewController: UIView {
     @IBAction fileprivate func toggleCloseButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleCloseButton")
+    }
+    
+    @IBAction fileprivate func toggleForwardButton(_ sender: Any) {
+        // Use the configured customMessageHandler to send messages to the UI
+        customMessageHandler?.sendMessage("toggleForwardButton")
+    }
+    
+    @IBAction fileprivate func toggleRewindButton(_ sender: Any) {
+        // Use the configured customMessageHandler to send messages to the UI
+        customMessageHandler?.sendMessage("toggleRewindButton")
     }
     
     @IBAction fileprivate func nextEpisodeButton(_ sender: Any) {
@@ -143,8 +155,29 @@ final class ViewController: UIView {
 extension ViewController: CustomMessageHandlerDelegate {
     func receivedSynchronousMessage(_ message: String, withData data: String?) -> String? {
         print("onEvent =) \(message)")
+        
+        if (message == "forwardButton") {
+            player?.seek(time: self.player!.currentTime + 10)
+            
+            if((self.onForward) != nil) {
+                self.onForward!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+            }
+
+            return nil
+        }
+        
+        if (message == "rewindButton") {
+            player?.seek(time: self.player!.currentTime - 10)
+            
+            if((self.onRewind) != nil) {
+                self.onRewind!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+            }
+
+            return nil
+        }
+        
         if((self.onEvent) != nil) {
-            self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
+            self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
 
         return nil
@@ -169,15 +202,15 @@ extension ViewController: PlayerListener {
 
     func onPlay(_ event: PlayEvent) {
         print("onPlay \(event.name)")
-        if((self.onPlaying) != nil) {
-            self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
+        if((self.onPlaying) != nil && self.player!.duration > 0) {
+            self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 
     func onSeeked(_ event: SeekedEvent) {
         print("onSeeked \(event.name) \(event.timestamp) \(self.player?.currentTime as Any)")
         if((self.onSeek) != nil) {
-            self.onSeek!(["message": "seek", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
+            self.onSeek!(["message": "seek", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 
@@ -185,14 +218,14 @@ extension ViewController: PlayerListener {
     func onReady(_ event: ReadyEvent) {
         print("onReady \(event.name)")
         if((self.onLoad) != nil) {
-            self.onLoad!(["message": "load", "volume": self.player?.volume as Any])
+            self.onLoad!(["message": "load", "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 
     func onPaused(_ event: PausedEvent) {
         print("onPaused \(event.time)")
         if((self.onPause) != nil) {
-            self.onPause!(["message": "pause", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any])
+            self.onPause!(["message": "pause", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 

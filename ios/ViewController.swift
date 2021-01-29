@@ -14,6 +14,7 @@ final class ViewController: UIView {
 
     var player: Player?
     var nextCallback: Bool = false
+    var customSeek: Bool = false
 
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
@@ -157,23 +158,19 @@ extension ViewController: CustomMessageHandlerDelegate {
         print("onEvent =) \(message)")
         
         if (message == "forwardButton") {
-            player?.seek(time: self.player!.currentTime + 10)
-            
             if((self.onForward) != nil) {
                 self.onForward!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+                customSeek = true;
             }
-
-            return nil
+            player?.seek(time: self.player!.currentTime + 10)
         }
         
         if (message == "rewindButton") {
-            player?.seek(time: self.player!.currentTime - 10)
-            
             if((self.onRewind) != nil) {
                 self.onRewind!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+                customSeek = true;
             }
-
-            return nil
+            player?.seek(time: self.player!.currentTime - 10)
         }
         
         if((self.onEvent) != nil) {
@@ -209,7 +206,9 @@ extension ViewController: PlayerListener {
 
     func onSeeked(_ event: SeekedEvent) {
         print("onSeeked \(event.name) \(event.timestamp) \(self.player?.currentTime as Any)")
-        if((self.onSeek) != nil) {
+        if (customSeek) {
+            customSeek = false;
+        } else if((self.onSeek) != nil) {
             self.onSeek!(["message": "seek", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }

@@ -21,6 +21,7 @@ type ReactNativeBitmovinPlayerType = {
     title?: string;
     subtitle?: string;
     nextPlayback?: number;
+    hearbeat?: number;
     advisory?: {
       classification: string;
       description: string;

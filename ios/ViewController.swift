@@ -15,7 +15,9 @@ final class ViewController: UIView {
     var player: Player?
     var nextCallback: Bool = false
     var customSeek: Bool = false
-
+    var offset: TimeInterval = 0
+    var hearbeat: Int = 10
+    
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
     let config = PlayerConfiguration()
@@ -46,6 +48,10 @@ final class ViewController: UIView {
         if((self.configuration!["startOffset"]) != nil) {
             config.sourceItem?.options = SourceOptions();
             config.sourceItem?.options?.startOffset = self.configuration!["startOffset"] as! TimeInterval;
+        }
+        
+        if((self.configuration!["hearbeat"]) != nil) {
+            hearbeat = self.configuration!["hearbeat"] as! Int
         }
 
         if((self.configuration!["title"]) != nil) {
@@ -234,6 +240,13 @@ extension ViewController: PlayerListener {
             if((self.onEvent) != nil) {
                 nextCallback = true;
                 self.onEvent!(["message": "next"])
+            }
+        }
+        
+        if((event.currentTime > (offset + Double(hearbeat)) || event.currentTime < (offset - Double(hearbeat))) && event.currentTime < (self.player?.duration ?? 0)) {
+            offset = event.currentTime;
+            if((self.onEvent) != nil) {
+                self.onEvent!(["message": "save", "time": self.player?.currentTime as Any])
             }
         }
     }

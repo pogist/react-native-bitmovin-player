@@ -10,6 +10,7 @@ import BitmovinPlayer
 
 final class ViewController: UIView {
     @objc var autoPlay: Bool = false
+    @objc var hasZoom: Bool = false
     @objc var configuration: NSDictionary? = nil
 
     var player: Player?
@@ -17,7 +18,7 @@ final class ViewController: UIView {
     var customSeek: Bool = false
     var offset: TimeInterval = 0
     var hearbeat: Int = 10
-    
+
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
     let config = PlayerConfiguration()
@@ -49,7 +50,7 @@ final class ViewController: UIView {
             config.sourceItem?.options = SourceOptions();
             config.sourceItem?.options?.startOffset = self.configuration!["startOffset"] as! TimeInterval;
         }
-        
+
         if((self.configuration!["hearbeat"]) != nil) {
             hearbeat = self.configuration!["hearbeat"] as! Int
         }
@@ -57,17 +58,21 @@ final class ViewController: UIView {
         if((self.configuration!["title"]) != nil) {
             config.sourceItem?.itemTitle = self.configuration!["title"] as? String;
         }
-        
+
         if((self.configuration!["hasNextEpisode"]) != nil) {
             config.sourceItem?.metadata.addEntries(from: ["hasNextEpisode": self.configuration!["hasNextEpisode"] as! Bool])
         }
-        
+
         if((self.configuration!["advisory"]) != nil) {
             config.sourceItem?.metadata.addEntries(from: ["advisory": self.configuration!["advisory"] as Any])
         }
 
         if((self.configuration!["subtitle"]) != nil) {
             config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
+        }
+        
+        if (self.hasZoom == true){
+            config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
         }
 
         player?.setup(configuration: config)
@@ -121,7 +126,7 @@ final class ViewController: UIView {
     @objc var onSeek:RCTDirectEventBlock? = nil
     @objc var onForward:RCTDirectEventBlock? = nil
     @objc var onRewind:RCTDirectEventBlock? = nil
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -130,17 +135,17 @@ final class ViewController: UIView {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleCloseButton")
     }
-    
+
     @IBAction fileprivate func toggleForwardButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleForwardButton")
     }
-    
+
     @IBAction fileprivate func toggleRewindButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("toggleRewindButton")
     }
-    
+
     @IBAction fileprivate func nextEpisodeButton(_ sender: Any) {
         // Use the configured customMessageHandler to send messages to the UI
         customMessageHandler?.sendMessage("nextEpisodeButton")
@@ -162,7 +167,7 @@ final class ViewController: UIView {
 extension ViewController: CustomMessageHandlerDelegate {
     func receivedSynchronousMessage(_ message: String, withData data: String?) -> String? {
         print("onEvent =) \(message)")
-        
+
         if (message == "forwardButton") {
             if((self.onForward) != nil) {
                 self.onForward!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
@@ -170,7 +175,7 @@ extension ViewController: CustomMessageHandlerDelegate {
             }
             player?.seek(time: self.player!.currentTime + 10)
         }
-        
+
         if (message == "rewindButton") {
             if((self.onRewind) != nil) {
                 self.onRewind!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
@@ -178,7 +183,7 @@ extension ViewController: CustomMessageHandlerDelegate {
             }
             player?.seek(time: self.player!.currentTime - 10)
         }
-        
+
         if((self.onEvent) != nil) {
             self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
@@ -242,7 +247,7 @@ extension ViewController: PlayerListener {
                 self.onEvent!(["message": "next"])
             }
         }
-        
+
         if((event.currentTime > (offset + Double(hearbeat)) || event.currentTime < (offset - Double(hearbeat))) && event.currentTime < (self.player?.duration ?? 0)) {
             offset = event.currentTime;
             if((self.onEvent) != nil) {

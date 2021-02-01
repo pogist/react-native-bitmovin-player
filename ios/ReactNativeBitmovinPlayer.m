@@ -11,6 +11,7 @@ RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
 RCT_EXTERN_METHOD(play)
 
 RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(hasZoom, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(onLoad, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onEvent, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPlaying, RCTDirectEventBlock)

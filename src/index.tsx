@@ -3,6 +3,7 @@ import React from 'react';
 
 type ReactNativeBitmovinPlayerType = {
   autoPlay: boolean;
+  hasZoom: boolean;
   style?: any;
   onLoad?: (event: any) => void;
   onPlaying?: (event: any) => void;
@@ -48,6 +49,7 @@ export { ReactNativeBitmovinPlayerIntance };
 
 export default ({
   autoPlay,
+  hasZoom,
   style,
   onLoad,
   onPlaying,
@@ -63,6 +65,7 @@ export default ({
     <ReactNativeBitmovinPlayer
       {...{
         autoPlay,
+        hasZoom,
         onLoad,
         onPlaying,
         onPause,

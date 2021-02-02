@@ -38,7 +38,7 @@ final class ViewController: UIView {
             let subtitleTrack = SubtitleTrack(url: URL(string: self.configuration!["subtitles"] as! String),
               label: "en",
               identifier: "en",
-              isDefaultTrack: true,
+              isDefaultTrack: false,
               language: "en")
             config.sourceItem?.add(subtitleTrack: subtitleTrack)
         }
@@ -71,7 +71,7 @@ final class ViewController: UIView {
         if((self.configuration!["subtitle"]) != nil) {
             config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
         }
-        
+
         if (self.hasZoom == true){
             config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
         }
@@ -161,25 +161,25 @@ final class ViewController: UIView {
         bitmovinUserInterfaceConfiguration.customMessageHandler = customMessageHandler
         return bitmovinUserInterfaceConfiguration
     }
-    
+
     func play() -> Void {
         DispatchQueue.main.async { [unowned self] in
             player?.play()
         }
     }
-    
+
     func seekBackwardCommand() -> Void {
         DispatchQueue.main.async { [unowned self] in
             player?.seek(time: self.player!.currentTime - 10)
         }
     }
-    
+
     func seekForwardCommand() -> Void {
         DispatchQueue.main.async { [unowned self] in
             player?.seek(time: self.player!.currentTime + 10)
         }
     }
-    
+
     func pause() -> Void {
         DispatchQueue.main.async { [unowned self] in
             player?.pause()
@@ -198,7 +198,7 @@ extension ViewController: CustomMessageHandlerDelegate {
                 player?.pause()
             }
         }
-        
+
         if (message == "forwardButton") {
             if((self.onForward) != nil) {
                 self.onForward!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
@@ -214,12 +214,12 @@ extension ViewController: CustomMessageHandlerDelegate {
             }
             player?.seek(time: self.player!.currentTime - 10)
         }
-        
+
         if (message == "zoomButton") {
             zoom = !zoom;
             config.styleConfiguration.scalingMode = zoom ? BMPScalingMode.zoom : BMPScalingMode.fit;
         }
-        
+
 
         if((self.onEvent) != nil) {
             self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])

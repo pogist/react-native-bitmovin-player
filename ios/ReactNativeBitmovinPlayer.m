@@ -9,6 +9,9 @@ RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(play)
+RCT_EXTERN_METHOD(pause)
+RCT_EXTERN_METHOD(seekBackwardCommand)
+RCT_EXTERN_METHOD(seekForwardCommand)
 
 RCT_EXPORT_VIEW_PROPERTY(autoPlay, BOOL)
 RCT_EXPORT_VIEW_PROPERTY(hasZoom, BOOL)

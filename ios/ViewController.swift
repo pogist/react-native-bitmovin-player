@@ -16,6 +16,7 @@ final class ViewController: UIView {
     var player: Player?
     var nextCallback: Bool = false
     var customSeek: Bool = false
+    var zoom: Bool = false
     var offset: TimeInterval = 0
     var hearbeat: Int = 10
 
@@ -160,6 +161,30 @@ final class ViewController: UIView {
         bitmovinUserInterfaceConfiguration.customMessageHandler = customMessageHandler
         return bitmovinUserInterfaceConfiguration
     }
+    
+    func play() -> Void {
+        DispatchQueue.main.async { [unowned self] in
+            player?.play()
+        }
+    }
+    
+    func seekBackwardCommand() -> Void {
+        DispatchQueue.main.async { [unowned self] in
+            player?.seek(time: self.player!.currentTime - 10)
+        }
+    }
+    
+    func seekForwardCommand() -> Void {
+        DispatchQueue.main.async { [unowned self] in
+            player?.seek(time: self.player!.currentTime + 10)
+        }
+    }
+    
+    func pause() -> Void {
+        DispatchQueue.main.async { [unowned self] in
+            player?.pause()
+        }
+    }
 
 }
 
@@ -168,6 +193,12 @@ extension ViewController: CustomMessageHandlerDelegate {
     func receivedSynchronousMessage(_ message: String, withData data: String?) -> String? {
         print("onEvent =) \(message)")
 
+        if (message == "closePlayer") {
+            DispatchQueue.main.async { [unowned self] in
+                player?.pause()
+            }
+        }
+        
         if (message == "forwardButton") {
             if((self.onForward) != nil) {
                 self.onForward!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
@@ -183,6 +214,12 @@ extension ViewController: CustomMessageHandlerDelegate {
             }
             player?.seek(time: self.player!.currentTime - 10)
         }
+        
+        if (message == "zoomButton") {
+            zoom = !zoom;
+            config.styleConfiguration.scalingMode = zoom ? BMPScalingMode.zoom : BMPScalingMode.fit;
+        }
+        
 
         if((self.onEvent) != nil) {
             self.onEvent!(["message": message, "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])

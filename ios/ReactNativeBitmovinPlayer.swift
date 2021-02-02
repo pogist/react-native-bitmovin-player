@@ -4,14 +4,15 @@ import AVFoundation
 
 @objc(ReactNativeBitmovinPlayer)
 class ReactNativeBitmovinPlayer: RCTViewManager {
-
+    var playerView: ViewController?
     @objc(multiply:withB:withResolver:withRejecter:)
     func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
         resolve(a*b)
     }
 
     override func view() -> UIView! {
-        return ViewController()
+        playerView = ViewController()
+        return playerView;
     }
 
     override static func requiresMainQueueSetup() -> Bool {
@@ -20,7 +21,21 @@ class ReactNativeBitmovinPlayer: RCTViewManager {
 
     @objc(play)
     func play() -> Void {
-//        playerView.play()
+        playerView?.play()
     }
-
+    
+    @objc(pause)
+    func pause() -> Void {
+        playerView?.pause()
+    }
+    
+    @objc(seekBackwardCommand)
+    func seekBackwardCommand() -> Void {
+        playerView?.seekBackwardCommand()
+    }
+    
+    @objc(seekForwardCommand)
+    func seekForwardCommand() -> Void {
+        playerView?.seekForwardCommand()
+    }
 }

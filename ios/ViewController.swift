@@ -288,7 +288,7 @@ extension ViewController: PlayerListener {
         if((event.currentTime > (offset + Double(hearbeat)) || event.currentTime < (offset - Double(hearbeat))) && event.currentTime < (self.player?.duration ?? 0)) {
             offset = event.currentTime;
             if((self.onEvent) != nil) {
-                self.onEvent!(["message": "save", "time": self.player?.currentTime as Any])
+                self.onEvent!(["message": "save", "time": offset as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
             }
         }
     }
@@ -301,4 +301,3 @@ extension ViewController: PlayerListener {
         print("onError \(event.message)")
     }
 }
-

@@ -14,7 +14,7 @@ type ReactNativeBitmovinPlayerType = {
   onRewind?: (event: any) => void;
   configuration: {
     url: string;
-    poster: string;
+    poster?: string;
     startOffset: number;
     hasNextEpisode: boolean;
     subtitles?: string;

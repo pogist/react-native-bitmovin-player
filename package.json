@@ -1,6 +1,6 @@
 {
   "name": "@takeoffmedia/react-native-bitmovin-player",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "React native bitmovin player",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

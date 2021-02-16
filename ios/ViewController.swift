@@ -11,6 +11,7 @@ import BitmovinPlayer
 final class ViewController: UIView {
     @objc var autoPlay: Bool = false
     @objc var hasZoom: Bool = false
+    @objc var deviceZoom: Bool = false
     @objc var configuration: NSDictionary? = nil
 
     var player: Player?
@@ -72,8 +73,9 @@ final class ViewController: UIView {
             config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
         }
 
-        if (self.hasZoom == true){
-            config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
+        if (self.hasZoom == true && self.deviceZoom){
+            // config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
+            config.styleConfiguration.scalingMode = BMPScalingMode.zoom;
         }
 
         player?.setup(configuration: config)

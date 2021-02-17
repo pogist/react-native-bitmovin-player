@@ -29,6 +29,15 @@ type ReactNativeBitmovinPlayerType = {
       description: string;
     };
   };
+  analytics?: {
+    videoId: string;
+    title: string;
+    userId: string;
+    cdnProvider: string;
+    customData1: string;
+    customData2: string;
+    customData3: string;
+  };
 };
 
 type ReactNativeBitmovinPlayerMethodsType = {
@@ -64,6 +73,7 @@ export default ({
   onForward,
   onRewind,
   configuration,
+  analytics,
 }: ReactNativeBitmovinPlayerType) => {
   const styles = { flex: 1, width: '100%', height: '100%' };
   return (
@@ -80,6 +90,7 @@ export default ({
         onRewind,
         onForward,
         configuration,
+        analytics,
       }}
       style={[styles, style]}
     />

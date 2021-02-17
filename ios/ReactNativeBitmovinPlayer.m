@@ -24,5 +24,6 @@ RCT_EXPORT_VIEW_PROPERTY(onSeek, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onForward, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onRewind, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(configuration, NSDictionary);
+RCT_EXPORT_VIEW_PROPERTY(analytics, NSDictionary);
 
 @end

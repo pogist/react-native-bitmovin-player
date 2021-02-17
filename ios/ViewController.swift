@@ -7,13 +7,16 @@
 //
 import UIKit
 import BitmovinPlayer
+import BitmovinAnalyticsCollector
 
 final class ViewController: UIView {
     @objc var autoPlay: Bool = false
     @objc var hasZoom: Bool = false
     @objc var deviceZoom: Bool = false
     @objc var configuration: NSDictionary? = nil
+    @objc var analytics: NSDictionary? = nil
 
+    var analyticsCollector: BitmovinPlayerCollector? = nil
     var player: Player?
     var nextCallback: Bool = false
     var customSeek: Bool = false
@@ -83,6 +86,30 @@ final class ViewController: UIView {
         if (self.autoPlay == true){
             player?.play()
         }
+
+        if(self.analytics != nil) {
+            var plistDictionary: NSDictionary?
+            if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
+                plistDictionary = NSDictionary(contentsOfFile: path)
+            }
+            // Create a BitmovinAnalyticsConfig using your Bitmovin analytics license key and/or your Bitmovin Player Key
+            let configAnalytics:BitmovinAnalyticsConfig = BitmovinAnalyticsConfig(key: plistDictionary!["BitmovinAnalyticsLicenseKey"] as! String, playerKey: plistDictionary!["BitmovinPlayerLicenseKey"] as! String)
+
+            configAnalytics.videoId = self.analytics!["videoId"] as? String;
+            configAnalytics.title = self.analytics!["title"] as? String;
+            configAnalytics.customerUserId = self.analytics!["userId"] as? String;
+            configAnalytics.cdnProvider = self.analytics!["cdnProvider"] as? String;
+            configAnalytics.customData1 = self.analytics!["customData1"] as? String;
+            configAnalytics.customData2 = self.analytics!["customData2"] as? String;
+            configAnalytics.customData3 = self.analytics!["customData3"] as? String;
+
+            // Create a BitmovinAnalytics object using the config just created
+            analyticsCollector = BitmovinAnalytics(config: configAnalytics);
+
+            // Attach your player instance
+            analyticsCollector!.attachPlayer(player: player!);
+        }
+
     }
 
     override init(frame:CGRect) {
@@ -198,6 +225,10 @@ extension ViewController: CustomMessageHandlerDelegate {
         if (message == "closePlayer") {
             DispatchQueue.main.async { [unowned self] in
                 player?.pause()
+                // Detach your player when you are done.
+                if (analyticsCollector != nil) {
+                    analyticsCollector!.detachPlayer()
+                }
             }
         }
 

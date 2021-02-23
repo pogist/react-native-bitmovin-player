@@ -145,6 +145,9 @@ final class ViewController: UIView {
         playerView.frame = frame
 
         playerView.add(listener: self)
+        
+        // Make sure that the correct audio session category is set to allow for background playback.
+        handleAudioSessionCategorySetting()
 
         self.addSubview(playerView)
     }
@@ -212,6 +215,20 @@ final class ViewController: UIView {
     func pause() -> Void {
         DispatchQueue.main.async { [unowned self] in
             player?.pause()
+        }
+    }
+    
+    
+    func handleAudioSessionCategorySetting() {
+        let audioSession = AVAudioSession.sharedInstance()
+
+        // When AVAudioSessionCategoryPlayback is already active, we have nothing to do here
+        guard audioSession.category.rawValue != AVAudioSession.Category.playback.rawValue else { return }
+
+        do {
+            try audioSession.setCategory(AVAudioSession.Category.playback, mode: AVAudioSession.Mode.moviePlayback)
+        } catch {
+            print("Setting category to AVAudioSessionCategoryPlayback failed.")
         }
     }
 

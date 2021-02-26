@@ -83,8 +83,9 @@ final class ViewController: UIView {
 
         player?.setup(configuration: config)
         nextCallback = false;
+        
         if (self.autoPlay == true){
-            player?.play()
+            config.playbackConfiguration.isAutoplayEnabled = true;
         }
 
         if(self.analytics != nil) {
@@ -156,6 +157,7 @@ final class ViewController: UIView {
     @objc var onPlaying:RCTDirectEventBlock? = nil
     @objc var onPause:RCTDirectEventBlock? = nil
     @objc var onEvent:RCTDirectEventBlock? = nil
+    @objc var onError:RCTDirectEventBlock? = nil
     @objc var onSeek:RCTDirectEventBlock? = nil
     @objc var onForward:RCTDirectEventBlock? = nil
     @objc var onRewind:RCTDirectEventBlock? = nil
@@ -349,5 +351,8 @@ extension ViewController: PlayerListener {
 
     func onError(_ event: ErrorEvent) {
         print("onError \(event.message)")
+        if((self.onError) != nil) {
+            self.onError!(["message": event.message, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+        }
     }
 }

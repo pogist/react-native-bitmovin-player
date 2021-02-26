@@ -10,6 +10,7 @@ type ReactNativeBitmovinPlayerType = {
   onPlaying?: (event: any) => void;
   onPause?: (event: any) => void;
   onEvent?: (event: any) => void;
+  onError?: (event: any) => void;
   onSeek?: (event: any) => void;
   onForward?: (event: any) => void;
   onRewind?: (event: any) => void;
@@ -69,6 +70,7 @@ export default ({
   onPlaying,
   onPause,
   onEvent,
+  onError,
   onSeek,
   onForward,
   onRewind,
@@ -86,6 +88,7 @@ export default ({
         onPlaying,
         onPause,
         onEvent,
+        onError,
         onSeek,
         onRewind,
         onForward,

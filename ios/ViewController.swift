@@ -80,14 +80,14 @@ final class ViewController: UIView {
             // config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
             config.styleConfiguration.scalingMode = BMPScalingMode.zoom;
         }
-
-        player?.setup(configuration: config)
-        nextCallback = false;
         
         if (self.autoPlay == true){
             config.playbackConfiguration.isAutoplayEnabled = true;
         }
 
+        player?.setup(configuration: config)
+        nextCallback = false;
+        
         if(self.analytics != nil) {
             var plistDictionary: NSDictionary?
             if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
@@ -244,6 +244,16 @@ extension ViewController: CustomMessageHandlerDelegate {
         if (message == "closePlayer") {
             DispatchQueue.main.async { [unowned self] in
                 player?.pause()
+                // Detach your player when you are done.
+                if (analyticsCollector != nil) {
+                    analyticsCollector!.detachPlayer()
+                }
+            }
+        }
+        
+        if (message == "nextEpisode") {
+            DispatchQueue.main.async { [unowned self] in
+                player?.destroy()
                 // Detach your player when you are done.
                 if (analyticsCollector != nil) {
                     analyticsCollector!.detachPlayer()

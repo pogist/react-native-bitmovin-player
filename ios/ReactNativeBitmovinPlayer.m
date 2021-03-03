@@ -10,6 +10,7 @@ RCT_EXTERN_METHOD(multiply:(float)a withB:(float)b
 
 RCT_EXTERN_METHOD(play)
 RCT_EXTERN_METHOD(pause)
+RCT_EXTERN_METHOD(destroy)
 RCT_EXTERN_METHOD(seekBackwardCommand)
 RCT_EXTERN_METHOD(seekForwardCommand)
 

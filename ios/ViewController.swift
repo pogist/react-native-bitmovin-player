@@ -80,14 +80,14 @@ final class ViewController: UIView {
             // config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
             config.styleConfiguration.scalingMode = BMPScalingMode.zoom;
         }
-        
+
         if (self.autoPlay == true){
             config.playbackConfiguration.isAutoplayEnabled = true;
         }
 
         player?.setup(configuration: config)
         nextCallback = false;
-        
+
         if(self.analytics != nil) {
             var plistDictionary: NSDictionary?
             if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
@@ -146,7 +146,7 @@ final class ViewController: UIView {
         playerView.frame = frame
 
         playerView.add(listener: self)
-        
+
         // Make sure that the correct audio session category is set to allow for background playback.
         handleAudioSessionCategorySetting()
 
@@ -219,8 +219,13 @@ final class ViewController: UIView {
             player?.pause()
         }
     }
-    
-    
+
+    func destroy() -> Void {
+        DispatchQueue.main.async { [unowned self] in
+            player?.destroy()
+        }
+    }
+
     func handleAudioSessionCategorySetting() {
         let audioSession = AVAudioSession.sharedInstance()
 
@@ -243,14 +248,14 @@ extension ViewController: CustomMessageHandlerDelegate {
 
         if (message == "closePlayer") {
             DispatchQueue.main.async { [unowned self] in
-                player?.pause()
+                player?.destroy()
                 // Detach your player when you are done.
                 if (analyticsCollector != nil) {
                     analyticsCollector!.detachPlayer()
                 }
             }
         }
-        
+
         if (message == "nextEpisode") {
             DispatchQueue.main.async { [unowned self] in
                 player?.destroy()

@@ -46,6 +46,7 @@ type ReactNativeBitmovinPlayerMethodsType = {
     multiply(a: number, b: number): Promise<number>;
     play(): void;
     pause(): void;
+    destroy(): void;
     seekBackwardCommand(): void;
     seekForwardCommand(): void;
   };

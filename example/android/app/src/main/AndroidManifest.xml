@@ -8,7 +8,6 @@
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
-      android:allowBackup="false"
       android:theme="@style/AppTheme">
       <activity
         android:name=".MainActivity"
@@ -21,6 +20,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <meta-data
+            android:name="BITMOVIN_PLAYER_LICENSE_KEY"
+            android:value="37bf7581-f96e-4c92-9f9b-31297e8a9507"/>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
     </application>
 

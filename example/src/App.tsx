@@ -1,30 +1,46 @@
 import * as React from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import ReactNativeBitmovinPlayer, {
   ReactNativeBitmovinPlayerIntance,
 } from '@takeoffmedia/react-native-bitmovin-player';
+import { useState } from 'react';
+
+const videoUrl = Platform.select({
+  ios: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+  android: 'https://bitdash-a.akamaihd.net/content/sintel/sintel.mpd',
+  default: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+});
 
 export default function App() {
+  const [loading, setLoading] = useState(false);
+
   React.useEffect(() => {
     ReactNativeBitmovinPlayerIntance.multiply(3, 7).then((result) => {
       console.log({ result });
     });
+
+    setTimeout(() => {
+      setLoading(true);
+    }, 2000);
     // ReactNativeBitmovinPlayerIntance.play();
   }, []);
 
   return (
     <View style={styles.container}>
       <ReactNativeBitmovinPlayer
-        autoPlay={false}
+        videoId="7MdZL5hqye4"
+        autoPlay={true}
+        style={{ height: loading ? 300 : '100%', width: '100%', flex: 0 }}
+        // style={{ height: 300, width: 300, flex: 0 }}
         configuration={{
           title: 'The Brown',
           subtitle: 'S1 · E1',
-          startOffset: 1000,
+          startOffset: 0,
           nextPlayback: 30,
           hasNextEpisode: false,
-          url:
-            'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
+          hearbeat: 10,
+          url: videoUrl,
           poster:
             'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
           subtitles:
@@ -55,8 +71,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'black',
   },
   box: {
     width: 60,

@@ -116,6 +116,14 @@ export default ({
         'onSeek',
         (event: any) => !!onSeek && onSeek({ nativeEvent: event })
       );
+      eventEmitter.addListener(
+        'onForward',
+        (event: any) => !!onForward && onForward({ nativeEvent: event })
+      );
+      eventEmitter.addListener(
+        'onRewind',
+        (event: any) => !!onRewind && onRewind({ nativeEvent: event })
+      );
     }
     return () => {
       if (Platform.OS === 'android') {
@@ -124,6 +132,8 @@ export default ({
         eventEmitter.removeListener('onPlay', () => {});
         eventEmitter.removeListener('onPause', () => {});
         eventEmitter.removeListener('onSeek', () => {});
+        eventEmitter.removeListener('onForward', () => {});
+        eventEmitter.removeListener('onRewind', () => {});
       }
     };
   }, []);

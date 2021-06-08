@@ -11,7 +11,10 @@ import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack
+import com.bitmovin.player.api.source.Source
 import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.api.source.SourceType
+import com.bitmovin.player.api.ui.StyleConfig
 import com.bitmovin.player.ui.CustomMessageHandler
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.ReadableMap
@@ -36,15 +39,81 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
   private var heartbeat: Int = 10
   private var offset: Double = 0.0
   private var nextCallback: Boolean = false
+  private var customSeek: Boolean = false
 
   private var reactContextGlobal: ThemedReactContext? = null;
 
   // Create a custom javascriptInterface object which takes over the Bitmovin Web UI -> native calls
   val javascriptInterface = object : Any() {
     @JavascriptInterface
-    fun closePlayer(data: String): String? {
-      // finish()
-      return null
+    fun closePlayerAsync(data: String) {
+      val map: WritableMap = Arguments.createMap()
+      map.putString("message", "closePlayer")
+      map.putString("time", player.currentTime.toString())
+      map.putString("volume", player.volume.toString())
+      map.putString("duration", player.duration.toString())
+      player.destroy()
+      try {
+        reactContextGlobal
+          ?.getJSModule(RCTDeviceEventEmitter::class.java)
+          ?.emit("onEvent", map)
+
+      } catch (e: Exception) {
+        Log.e("ReactNative", "Caught Exception: " + e.message)
+      }
+    }
+    @JavascriptInterface
+    fun nextEpisodeAsync(data: String) {
+      val map: WritableMap = Arguments.createMap()
+      map.putString("message", "nextEpisode")
+      map.putString("time", player.currentTime.toString())
+      map.putString("volume", player.volume.toString())
+      map.putString("duration", player.duration.toString())
+      player.destroy()
+      try {
+        reactContextGlobal
+          ?.getJSModule(RCTDeviceEventEmitter::class.java)
+          ?.emit("onEvent", map)
+
+      } catch (e: Exception) {
+        Log.e("ReactNative", "Caught Exception: " + e.message)
+      }
+    }
+    @JavascriptInterface
+    fun forwardButtonAsync(data: String) {
+      val map: WritableMap = Arguments.createMap()
+      map.putString("message", "forwardButton")
+      map.putString("time", player.currentTime.toString())
+      map.putString("volume", player.volume.toString())
+      map.putString("duration", player.duration.toString())
+      player.seek(player.currentTime + 10);
+      customSeek = true;
+      try {
+        reactContextGlobal
+          ?.getJSModule(RCTDeviceEventEmitter::class.java)
+          ?.emit("onForward", map)
+
+      } catch (e: Exception) {
+        Log.e("ReactNative", "Caught Exception: " + e.message)
+      }
+    }
+    @JavascriptInterface
+    fun rewindButtonAsync(data: String) {
+      val map: WritableMap = Arguments.createMap()
+      map.putString("message", "rewindButton")
+      map.putString("time", player.currentTime.toString())
+      map.putString("volume", player.volume.toString())
+      map.putString("duration", player.duration.toString())
+      player.seek(player.currentTime - 10);
+      customSeek = true;
+      try {
+        reactContextGlobal
+          ?.getJSModule(RCTDeviceEventEmitter::class.java)
+          ?.emit("onRewind", map)
+
+      } catch (e: Exception) {
+        Log.e("ReactNative", "Caught Exception: " + e.message)
+      }
     }
   }
 
@@ -59,23 +128,57 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
   fun setConfiguration(view: PlayerView, config: ReadableMap) {
     configuration = config;
     val sourceItem: SourceConfig?
+    var title: String = "";
+    var subtitle: String = "";
+    var url: String = "";
+    var poster: String = ""
     // Create a new source configuration
 
     if (configuration != null && configuration!!.getString("url") != null) {
       //load the SourceConfig into the player
-      sourceItem = SourceConfig.fromUrl(configuration!!.getString("url").toString())
+      url = configuration!!.getString("url").toString()
 
       if (configuration!!.getString("subtitles") != null) {
         subtitleTrack = SubtitleTrack(configuration!!.getString("subtitles").toString(), null, "en", "en", false, "en")
-
-        sourceItem.addSubtitleTrack(subtitleTrack!!);
       }
 
       if (configuration!!.getString("thumbnails") != null) {
         thumbnailTrack = ThumbnailTrack(configuration!!.getString("thumbnails").toString());
       }
 
-      player.load(sourceItem)
+      if (configuration!!.getString("title") != null) {
+        title = configuration!!.getString("title").toString();
+      }
+
+      if (configuration!!.getString("subtitle") != null) {
+        subtitle = configuration!!.getString("subtitle").toString();
+      }
+
+      if (configuration!!.getString("poster") != null) {
+        poster = configuration!!.getString("poster").toString();
+      }
+
+      val subtitleTracks = listOf(subtitleTrack)
+
+      val metaDataMap = mutableMapOf(
+        "hasNextEpisode" to "false",
+        "advisory" to "pepe"
+      );
+
+      val source = Source.create(
+        SourceConfig(
+          url = url,
+          type = SourceType.Dash,
+          title = title,
+          description = subtitle,
+          posterSource = poster,
+          thumbnailTrack = thumbnailTrack,
+          subtitleTracks = subtitleTracks as List<SubtitleTrack>,
+          metadata = metaDataMap
+        )
+      )
+
+      player.load(source)
     }
 
 
@@ -185,14 +288,17 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
     map.putString("time", player.currentTime.toString())
     map.putString("volume", player.volume.toString())
     map.putString("duration", player.duration.toString())
+    if (customSeek) {
+      customSeek = false;
+    } else {
+      try {
+        reactContextGlobal
+          ?.getJSModule(RCTDeviceEventEmitter::class.java)
+          ?.emit("onSeek", map)
 
-    try {
-      reactContextGlobal
-        ?.getJSModule(RCTDeviceEventEmitter::class.java)
-        ?.emit("onSeek", map)
-
-    } catch (e: Exception) {
-      Log.e("ReactNative", "Caught Exception: " + e.message)
+      } catch (e: Exception) {
+        Log.e("ReactNative", "Caught Exception: " + e.message)
+      }
     }
   }
 
@@ -203,11 +309,11 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
     // Creating a new PlayerConfig with a StyleConfig
     Log.i("jona", BuildConfig.APP_NAME);
 
-//    playerConfig.styleConfig = StyleConfig(
-//      // Set URLs for the JavaScript and the CSS
-//      playerUiJs = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/js/bitmovinplayer-ui.min.js",
-//      playerUiCss = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/css/bitmovinplayer-ui.min.css"
-//    );
+    playerConfig.styleConfig = StyleConfig(
+      // Set URLs for the JavaScript and the CSS
+      playerUiJs = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/js/bitmovinplayer-ui.min.js",
+      playerUiCss = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/css/bitmovinplayer-ui.min.css"
+    );
     playerConfig.playbackConfig = playBackConfig;
 
     // Create a Player with our PlayerConfig

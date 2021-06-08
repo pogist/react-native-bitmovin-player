@@ -46,7 +46,7 @@ export default function App() {
           subtitles:
             'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
           thumbnails:
-            'https://staging-api.britbox.takeoffmedia.com/v1/thumbnail?qs=P19fZ2RhX189MTYwOTg3ODc4OV9kMzcwZjRjZjA3MWFiOTlkN2QxYWQ0ZjNjMjczOWQ1YQ==&fn=L3RodW1ibmFpbF92MS82YTBiMTYtcGlwcy1waWQtcDA4OTFmc3QvdmZfcGlwcy1waWQtcDA4OTFmc3RfdGh1bWJuYWlsX21hbmlmZXN0X2E2ZmMxNjNiLWIxNjctNDNkOS1iZjBkLWFjOWZkNTJlNjJkMC54bWw=&ch=vod-thumb-ntham-comm-live.akamaized.net',
+            'https://staging-api.britbox.takeoffmedia.com/v1/thumbnail?qs=P19fZ2RhX189MTYyMzE4MDE0OF82M2ZlYzQxMjFkYTViOTMxOGIxMGJmNmUzNGM0MWIwMQ==&fn=L3RodW1ibmFpbF92MS83NDhhMzktcGlwcy1waWQtcDA5NzlseXIvdmZfcGlwcy1waWQtcDA5NzlseXJfdGh1bWJuYWlsX21hbmlmZXN0X2M2NmY3ZGFhLTNhNTgtNDk4ZC1iZGM3LWIyMDQ0YzkyNTBjYi54bWw=&ch=vod-thumb-ntham-comm-live.akamaized.net',
         }}
         onLoad={() => {
           console.log({ event: 'load' });
@@ -61,6 +61,12 @@ export default function App() {
           console.log({ nativeEvent });
         }}
         onSeek={({ nativeEvent }) => {
+          console.log({ nativeEvent });
+        }}
+        onForward={({ nativeEvent }) => {
+          console.log({ nativeEvent });
+        }}
+        onRewind={({ nativeEvent }) => {
           console.log({ nativeEvent });
         }}
       />

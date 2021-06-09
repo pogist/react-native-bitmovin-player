@@ -31,7 +31,11 @@ export default function App() {
       <ReactNativeBitmovinPlayer
         videoId="7MdZL5hqye4"
         autoPlay={true}
-        style={{ height: loading ? 300 : '100%', width: '100%', flex: 0 }}
+        style={
+          Platform.OS === 'android'
+            ? { height: loading ? 300 : '100%', width: '100%', flex: 0 }
+            : {}
+        }
         // style={{ height: 300, width: 300, flex: 0 }}
         configuration={{
           title: 'The Brown',
@@ -39,6 +43,10 @@ export default function App() {
           startOffset: 0,
           nextPlayback: 30,
           hasNextEpisode: false,
+          advisory: {
+            classification: 'TV-PG',
+            description: 'All Drama',
+          },
           hearbeat: 10,
           url: videoUrl,
           poster:

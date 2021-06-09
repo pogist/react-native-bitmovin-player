@@ -28,6 +28,11 @@ def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeBitmovinPlayer_' + name]).toInteger()
 }
 
+Properties properties = new Properties()
+if (project.rootProject.file('local.properties').canRead()) {
+  properties.load(project.rootProject.file("local.properties").newDataInputStream())
+}
+
 android {
   compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
   buildToolsVersion getExtOrDefault('buildToolsVersion')
@@ -36,7 +41,8 @@ android {
     targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
     versionCode 1
     versionName "1.0"
-    buildConfigField "String", "APP_NAME", "\"JONA\""
+    buildConfigField 'String', 'BITMOVIN_CSS', properties.getProperty('bitmovin.css', "\"\"")
+    buildConfigField 'String', 'BITMOVIN_JS', properties.getProperty('bitmovin.js', "\"\"")
   }
 
   buildTypes {
@@ -139,3 +145,4 @@ dependencies {
   implementation 'androidx.cardview:cardview:1.0.0'
   implementation "com.pierfrancescosoffritti.androidyoutubeplayer:core:8.0.1"
 }
+

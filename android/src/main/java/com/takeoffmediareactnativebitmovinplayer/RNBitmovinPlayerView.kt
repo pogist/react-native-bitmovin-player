@@ -23,6 +23,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEm
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
+import org.json.JSONObject
 
 
 class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
@@ -128,10 +129,12 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
   fun setConfiguration(view: PlayerView, config: ReadableMap) {
     configuration = config;
     val sourceItem: SourceConfig?
-    var title: String = "";
-    var subtitle: String = "";
-    var url: String = "";
-    var poster: String = ""
+    var title = "";
+    var subtitle = "";
+    var url = "";
+    var poster = ""
+    var hasNextEpisode = false
+    var advisory = ""
     // Create a new source configuration
 
     if (configuration != null && configuration!!.getString("url") != null) {
@@ -158,11 +161,16 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
         poster = configuration!!.getString("poster").toString();
       }
 
-      val subtitleTracks = listOf(subtitleTrack)
+      hasNextEpisode = configuration!!.getBoolean("hasNextEpisode")
 
-      val metaDataMap = mutableMapOf(
-        "hasNextEpisode" to "false",
-        "advisory" to "pepe"
+      if (configuration!!.getMap("advisory") != null) {
+        advisory = configuration!!.getMap("advisory")?.toString()!!;
+      }
+
+      val subtitleTracks = listOf(subtitleTrack)
+      val metaDataMap = mapOf(
+        "hasNextEpisode" to if (hasNextEpisode) "true" else "false",
+        "advisory" to JSONObject(advisory).toString()
       );
 
       val source = Source.create(
@@ -179,11 +187,6 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
       )
 
       player.load(source)
-    }
-
-
-    if (configuration != null && configuration!!.getString("title") != null) {
-
     }
 
     if (configuration != null && configuration!!.getString("heartbeat") != null) {
@@ -307,13 +310,15 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
     reactContextGlobal = reactContext;
     // Go to https://github.com/bitmovin/bitmovin-player-ui to get started with creating a custom player UI.
     // Creating a new PlayerConfig with a StyleConfig
-    Log.i("jona", BuildConfig.APP_NAME);
 
-    playerConfig.styleConfig = StyleConfig(
-      // Set URLs for the JavaScript and the CSS
-      playerUiJs = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/js/bitmovinplayer-ui.min.js",
-      playerUiCss = "https://stagev2-app-assets.britbox.takeoffmedia.com/player/uat/native/css/bitmovinplayer-ui.min.css"
-    );
+    if (BuildConfig.BITMOVIN_CSS != "" && BuildConfig.BITMOVIN_JS != "") {
+      playerConfig.styleConfig = StyleConfig(
+        // Set URLs for the JavaScript and the CSS
+        playerUiJs = BuildConfig.BITMOVIN_JS,
+        playerUiCss = BuildConfig.BITMOVIN_CSS
+      );
+    }
+
     playerConfig.playbackConfig = playBackConfig;
 
     // Create a Player with our PlayerConfig

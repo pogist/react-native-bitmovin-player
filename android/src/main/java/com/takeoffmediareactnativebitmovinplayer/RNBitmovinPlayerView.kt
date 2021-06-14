@@ -119,6 +119,10 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
     }
   }
 
+  fun destroy() {
+    player.destroy()
+  }
+
   @ReactProp(name = "autoPlay")
   fun setAutoPlay(view: PlayerView, autoPlay: Boolean?) {
     if (autoPlay != null && autoPlay == true) {

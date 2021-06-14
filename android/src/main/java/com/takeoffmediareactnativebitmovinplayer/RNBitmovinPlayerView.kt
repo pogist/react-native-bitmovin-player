@@ -224,22 +224,20 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
   private fun onTimeChanged(event: PlayerEvent.TimeChanged) {
     try {
       // next
-//      if (configuration != null && configuration!!.getString("nextPlayback") != null) {
-//        if (event.time <= player.duration - (configuration!!.getString("nextPlayback")?.toDouble()
-//            ?: 30.0) && nextCallback) {
-//          nextCallback = false;
-//        }
-//        if (event.time > player.duration - (configuration!!.getString("nextPlayback")?.toDouble()
-//            ?: 30.0) && !nextCallback) {
-//          nextCallback = true;
-//
-//          val map: WritableMap = Arguments.createMap()
-//          map.putString("message", "next")
-//          reactContextGlobal
-//            ?.getJSModule(RCTDeviceEventEmitter::class.java)
-//            ?.emit("onEvent", map)
-//        }
-//      }
+      if (configuration != null && configuration!!.hasKey("nextPlayback")) {
+        if (event.time <= player.duration - (configuration!!.getDouble("nextPlayback")) && nextCallback) {
+          nextCallback = false;
+        }
+        if (event.time > player.duration - (configuration!!.getDouble("nextPlayback")) && !nextCallback) {
+          nextCallback = true;
+
+          val map: WritableMap = Arguments.createMap()
+          map.putString("message", "next")
+          reactContextGlobal
+            ?.getJSModule(RCTDeviceEventEmitter::class.java)
+            ?.emit("onEvent", map)
+        }
+      }
 
       // save
       if((event.time > (offset + heartbeat) || event.time < (offset - heartbeat)) && event.time < (player.duration)) {

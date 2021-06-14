@@ -13,6 +13,7 @@ import com.bitmovin.player.api.media.subtitle.SubtitleTrack
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack
 import com.bitmovin.player.api.source.Source
 import com.bitmovin.player.api.source.SourceConfig
+import com.bitmovin.player.api.source.SourceOptions
 import com.bitmovin.player.api.source.SourceType
 import com.bitmovin.player.api.ui.StyleConfig
 import com.bitmovin.player.ui.CustomMessageHandler
@@ -173,6 +174,10 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
         "advisory" to JSONObject(advisory).toString()
       );
 
+      val options = SourceOptions();
+
+      options.startOffset = configuration!!.getDouble("startOffset")
+
       val source = Source.create(
         SourceConfig(
           url = url,
@@ -182,7 +187,8 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
           posterSource = poster,
           thumbnailTrack = thumbnailTrack,
           subtitleTracks = subtitleTracks as List<SubtitleTrack>,
-          metadata = metaDataMap
+          metadata = metaDataMap,
+          options = options
         )
       )
 

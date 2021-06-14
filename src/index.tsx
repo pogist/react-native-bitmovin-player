@@ -11,7 +11,6 @@ type ReactNativeBitmovinPlayerType = {
   autoPlay: boolean;
   hasZoom: boolean;
   deviceZoom: boolean;
-  videoId: string;
   style?: any;
   onLoad?: (event: any) => void;
   onPlaying?: (event: any) => void;
@@ -41,8 +40,8 @@ type ReactNativeBitmovinPlayerType = {
   };
   analytics?: {
     videoId: string;
-    title: string;
-    userId: string;
+    title: string | undefined;
+    userId: string | undefined;
     cdnProvider: string;
     customData1: string;
     customData2: string;
@@ -77,7 +76,6 @@ const eventEmitter = new NativeEventEmitter(
 
 export default ({
   autoPlay,
-  videoId,
   hasZoom,
   deviceZoom,
   style,
@@ -127,13 +125,13 @@ export default ({
     }
     return () => {
       if (Platform.OS === 'android') {
-        eventEmitter.removeListener('onEvent', () => {});
-        eventEmitter.removeListener('onLoad', () => {});
-        eventEmitter.removeListener('onPlay', () => {});
-        eventEmitter.removeListener('onPause', () => {});
-        eventEmitter.removeListener('onSeek', () => {});
-        eventEmitter.removeListener('onForward', () => {});
-        eventEmitter.removeListener('onRewind', () => {});
+        eventEmitter.removeAllListeners('onEvent');
+        eventEmitter.removeAllListeners('onLoad');
+        eventEmitter.removeAllListeners('onPlay');
+        eventEmitter.removeAllListeners('onPause');
+        eventEmitter.removeAllListeners('onSeek');
+        eventEmitter.removeAllListeners('onForward');
+        eventEmitter.removeAllListeners('onRewind');
       }
     };
   }, []);
@@ -143,7 +141,6 @@ export default ({
       {...{
         autoPlay,
         hasZoom,
-        videoId,
         deviceZoom,
         onLoad,
         onPlaying,

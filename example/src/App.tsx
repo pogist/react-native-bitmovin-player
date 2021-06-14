@@ -29,7 +29,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <ReactNativeBitmovinPlayer
-        videoId="7MdZL5hqye4"
         autoPlay={true}
         style={
           Platform.OS === 'android'

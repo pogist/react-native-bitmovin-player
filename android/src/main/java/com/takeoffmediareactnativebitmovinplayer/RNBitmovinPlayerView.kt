@@ -1,8 +1,9 @@
 package com.takeoffmediareactnativebitmovinplayer
 import android.util.Log
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.widget.LinearLayout
 import com.bitmovin.player.PlayerView
+import com.bitmovin.player.SubtitleView
 import com.bitmovin.player.api.PlaybackConfig
 import com.bitmovin.player.api.Player
 import com.bitmovin.player.api.PlayerConfig
@@ -33,6 +34,8 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
 
   private lateinit var player: Player
   private lateinit var playerView: PlayerView
+  private lateinit var subtitleView: SubtitleView
+
   private var configuration: ReadableMap? = null
   private var playerConfig: PlayerConfig = PlayerConfig()
   private var playBackConfig = PlaybackConfig()
@@ -197,6 +200,10 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
       )
 
       player.load(source)
+
+      // Creating a SubtitleView and assign the current player instance.
+      subtitleView = SubtitleView(reactContextGlobal!!)
+      subtitleView.setPlayer(player)
     }
 
     if (configuration != null && configuration!!.getString("heartbeat") != null) {
@@ -334,8 +341,8 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
 
     // Create new PlayerView with our Player
     playerView = PlayerView(reactContext, player)
-    playerView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-
+//    playerView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+    playerView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     // Set the CustomMessageHandler to the playerView
     playerView.setCustomMessageHandler(customMessageHandler)
     nextCallback = false;

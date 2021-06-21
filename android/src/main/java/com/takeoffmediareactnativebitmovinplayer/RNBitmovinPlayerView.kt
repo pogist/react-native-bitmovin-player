@@ -2,6 +2,8 @@ package com.takeoffmediareactnativebitmovinplayer
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import com.bitmovin.analytics.BitmovinAnalyticsConfig
+import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector
 import com.bitmovin.player.PlayerView
 import com.bitmovin.player.SubtitleView
 import com.bitmovin.player.api.PlaybackConfig
@@ -37,6 +39,8 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
   private lateinit var subtitleView: SubtitleView
 
   private var configuration: ReadableMap? = null
+  private var analyticsConfig: ReadableMap? = null
+  private var analyticsCollector: BitmovinPlayerCollector? = null
   private var playerConfig: PlayerConfig = PlayerConfig()
   private var playBackConfig = PlaybackConfig()
   private var subtitleTrack: SubtitleTrack? = null
@@ -62,7 +66,7 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
         reactContextGlobal
           ?.getJSModule(RCTDeviceEventEmitter::class.java)
           ?.emit("onEvent", map)
-
+        analyticsCollector!!.detachPlayer();
       } catch (e: Exception) {
         Log.e("ReactNative", "Caught Exception: " + e.message)
       }
@@ -79,7 +83,7 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
         reactContextGlobal
           ?.getJSModule(RCTDeviceEventEmitter::class.java)
           ?.emit("onEvent", map)
-
+        analyticsCollector!!.detachPlayer();
       } catch (e: Exception) {
         Log.e("ReactNative", "Caught Exception: " + e.message)
       }
@@ -131,6 +135,55 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
     if (autoPlay != null && autoPlay == true) {
       playBackConfig.isAutoplayEnabled = true
     }
+  }
+
+  @ReactProp(name = "analytics")
+  fun setAnalytics(view: PlayerView, analytics: ReadableMap) {
+    analyticsConfig = analytics
+    var title = "";
+    var videoId = "";
+    var userId = "";
+    var cdnProvider = "";
+    var customData1 = "";
+    var customData2 = "";
+    var customData3 = "";
+    if (analyticsConfig != null && analyticsConfig!!.getString("title") != null) {
+      title = analyticsConfig!!.getString("title").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("videoId") != null) {
+      videoId = analyticsConfig!!.getString("videoId").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("userId") != null) {
+      userId = analyticsConfig!!.getString("userId").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("cdnProvider") != null) {
+      cdnProvider = analyticsConfig!!.getString("cdnProvider").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("customData1") != null) {
+      customData1 = analyticsConfig!!.getString("customData1").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("customData2") != null) {
+      customData2 = analyticsConfig!!.getString("customData2").toString();
+    }
+    if (analyticsConfig != null && analyticsConfig!!.getString("customData3") != null) {
+      customData3 = analyticsConfig!!.getString("customData3").toString();
+    }
+
+    // Create a BitmovinAnalyticsConfig using your Bitmovin analytics license key and (optionally) your Bitmovin Player Key
+    val bitmovinAnalyticsConfig = BitmovinAnalyticsConfig(BuildConfig.BITMOVIN_ANALYTICS_LICENSE_KEY, BuildConfig.BITMOVIN_PLAYER_LICENSE_KEY)
+    bitmovinAnalyticsConfig.videoId = videoId
+    bitmovinAnalyticsConfig.title = title
+    bitmovinAnalyticsConfig.customUserId = userId
+    bitmovinAnalyticsConfig.cdnProvider = cdnProvider
+    bitmovinAnalyticsConfig.customData1 = customData1
+    bitmovinAnalyticsConfig.customData2 = customData2
+    bitmovinAnalyticsConfig.customData3 = customData3
+
+    // Create a BitmovinPlayerCollector object using the BitmovinAnalyitcsConfig you just created
+    analyticsCollector = BitmovinPlayerCollector(bitmovinAnalyticsConfig, reactContextGlobal!!)
+
+    // Attach your player instance
+    analyticsCollector!!.attachPlayer(player)
   }
 
   @ReactProp(name = "configuration")

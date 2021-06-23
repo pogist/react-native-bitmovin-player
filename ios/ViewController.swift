@@ -154,6 +154,7 @@ final class ViewController: UIView {
     }
 
     @objc var onLoad:RCTDirectEventBlock? = nil
+    @objc var onAirPlay:RCTDirectEventBlock? = nil
     @objc var onPlaying:RCTDirectEventBlock? = nil
     @objc var onPause:RCTDirectEventBlock? = nil
     @objc var onEvent:RCTDirectEventBlock? = nil
@@ -316,6 +317,12 @@ extension ViewController: PlayerListener {
         print("onPlay \(event.name)")
         if((self.onPlaying) != nil && self.player!.duration > 0) {
             self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+        }
+    }
+
+    func onAirPlayChanged(_ event: AirPlayChangedEvent) {
+        if((self.onAirPlay) != nil) {
+            self.onAirPlay!(["message": "onAirPlay", "value": self.player?.isAirPlayActive ?? false])
         }
     }
 

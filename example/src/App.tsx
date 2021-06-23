@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 import ReactNativeBitmovinPlayer, {
   ReactNativeBitmovinPlayerIntance,
 } from '@takeoffmedia/react-native-bitmovin-player';
@@ -14,7 +14,7 @@ const videoUrl = Platform.select({
 
 export default function App() {
   const [loading, setLoading] = useState(false);
-
+  const { height } = useWindowDimensions();
   React.useEffect(() => {
     ReactNativeBitmovinPlayerIntance.multiply(3, 7).then((result) => {
       console.log({ result });
@@ -32,7 +32,7 @@ export default function App() {
         autoPlay={true}
         style={
           Platform.OS === 'android'
-            ? { height: loading ? 300 : '100%', width: '100%', flex: 0 }
+            ? { height: loading ? height : '100%', width: '100%', flex: 0 }
             : {}
         }
         // style={{ height: 300, width: 300, flex: 0 }}

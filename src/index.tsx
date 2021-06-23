@@ -13,6 +13,7 @@ type ReactNativeBitmovinPlayerType = {
   deviceZoom: boolean;
   style?: any;
   onLoad?: (event: any) => void;
+  onAirPlay?: (event: any) => void;
   onPlaying?: (event: any) => void;
   onPause?: (event: any) => void;
   onEvent?: (event: any) => void;
@@ -80,6 +81,7 @@ export default ({
   deviceZoom,
   style,
   onLoad,
+  onAirPlay,
   onPlaying,
   onPause,
   onEvent,
@@ -143,6 +145,7 @@ export default ({
         hasZoom,
         deviceZoom,
         onLoad,
+        onAirPlay,
         onPlaying,
         onPause,
         onEvent,

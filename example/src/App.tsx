@@ -32,7 +32,11 @@ export default function App() {
         autoPlay={true}
         style={
           Platform.OS === 'android'
-            ? { height: loading ? height : '100%', width: '100%', flex: 0 }
+            ? {
+                height: loading ? height : '100%',
+                width: '100%',
+                flex: 0,
+              }
             : {}
         }
         // style={{ height: 300, width: 300, flex: 0 }}
@@ -50,8 +54,10 @@ export default function App() {
           url: videoUrl,
           poster:
             'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
+          // subtitles:
+          //   'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
           subtitles:
-            'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+            'https://staging-api.britbox.takeoffmedia.com/v1/subtitles.vtt?qs=P19fZ2RhX189MTYyNDQ5MjE4Ml8xNmM4OTIwYjI3MDNkNDcwNzBhZjk4MzgyZGMyODQzZg==&fn=L2lwbGF5ZXIvc3VidGl0bGVzL3Nfb2RfcDAwNC9tb2Rhdi9wMDd4dDdjeV9waXBzLXBpZC1wMDd4dDdjeV9jZTI1MWE4OS05ODY0LTQ3NzctODk0Yi00YTA4MWM3YjJmMDAuY2MueG1s&ch=vod-sub-ww-live.akamaized.net',
           thumbnails:
             'https://staging-api.britbox.takeoffmedia.com/v1/thumbnail?qs=P19fZ2RhX189MTYyMzE4MDE0OF82M2ZlYzQxMjFkYTViOTMxOGIxMGJmNmUzNGM0MWIwMQ==&fn=L3RodW1ibmFpbF92MS83NDhhMzktcGlwcy1waWQtcDA5NzlseXIvdmZfcGlwcy1waWQtcDA5NzlseXJfdGh1bWJuYWlsX21hbmlmZXN0X2M2NmY3ZGFhLTNhNTgtNDk4ZC1iZGM3LWIyMDQ0YzkyNTBjYi54bWw=&ch=vod-thumb-ntham-comm-live.akamaized.net',
         }}

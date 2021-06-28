@@ -1,7 +1,7 @@
 package com.takeoffmediareactnativebitmovinplayer
 import android.util.Log
-import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.widget.LinearLayout
 import com.bitmovin.analytics.BitmovinAnalyticsConfig
 import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector
 import com.bitmovin.player.PlayerView
@@ -14,6 +14,9 @@ import com.bitmovin.player.api.event.SourceEvent
 import com.bitmovin.player.api.event.on
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack
+import com.bitmovin.player.api.network.HttpRequestType
+import com.bitmovin.player.api.network.NetworkConfig
+import com.bitmovin.player.api.network.PreprocessHttpRequestCallback
 import com.bitmovin.player.api.source.Source
 import com.bitmovin.player.api.source.SourceConfig
 import com.bitmovin.player.api.source.SourceOptions
@@ -128,6 +131,10 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
 
   fun destroy() {
     player.destroy()
+  }
+
+  fun play() {
+    player.play()
   }
 
   @ReactProp(name = "autoPlay")
@@ -389,13 +396,23 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
 
     playerConfig.playbackConfig = playBackConfig;
 
+    val networkConfiguration = NetworkConfig()
+    networkConfiguration.preprocessHttpRequestCallback = PreprocessHttpRequestCallback { type, request ->
+      if (type == HttpRequestType.MediaSubtitles || type == HttpRequestType.Unknown) {
+        Log.d("BasicPlayback", "> REQUEST type:$type url:${request.url}")
+      } else {
+        Log.d("BasicPlayback", "| REQUEST type:$type")
+      }
+      return@PreprocessHttpRequestCallback null
+    }
+    playerConfig.networkConfig = networkConfiguration
+
     // Create a Player with our PlayerConfig
     player = Player.create(reactContext, playerConfig)
 
     // Create new PlayerView with our Player
     playerView = PlayerView(reactContext, player)
-//    playerView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-    playerView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+    playerView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
     // Set the CustomMessageHandler to the playerView
     playerView.setCustomMessageHandler(customMessageHandler)
     nextCallback = false;
@@ -408,6 +425,4 @@ class RNBitmovinPlayerView() : SimpleViewManager<PlayerView>() {
 
     return playerView;
   }
-
-
 }

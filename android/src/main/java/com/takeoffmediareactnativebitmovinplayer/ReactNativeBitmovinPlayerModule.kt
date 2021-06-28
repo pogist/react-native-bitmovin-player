@@ -27,4 +27,9 @@ class ReactNativeBitmovinPlayerModule(
       player.destroy();
     }
 
+    @ReactMethod
+    fun play() {
+      player.play();
+    }
+
 }

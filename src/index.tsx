@@ -5,10 +5,10 @@ import {
   NativeEventEmitter,
   Platform,
 } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 type ReactNativeBitmovinPlayerType = {
-  autoPlay: boolean;
+  autoPlay?: boolean;
   hasZoom: boolean;
   deviceZoom: boolean;
   style?: any;
@@ -93,21 +93,31 @@ export default ({
   analytics,
 }: ReactNativeBitmovinPlayerType) => {
   const styles = { flex: 1, width: '100%', height: '100%' };
-
+  const [maxHeight, setMaxHeight] = useState(0);
+  const _player = useRef<any>({
+    current: undefined,
+  });
   useEffect(() => {
     if (Platform.OS === 'android') {
-      eventEmitter.addListener(
-        'onEvent',
-        (event: any) => !!onEvent && onEvent({ nativeEvent: event })
-      );
-      eventEmitter.addListener(
-        'onLoad',
-        (event: any) => !!onLoad && onLoad({ nativeEvent: event })
-      );
-      eventEmitter.addListener(
-        'onPlay',
-        (event: any) => !!onPlaying && onPlaying({ nativeEvent: event })
-      );
+      eventEmitter.addListener('onEvent', (event: any) => {
+        return !!onEvent && onEvent({ nativeEvent: event });
+      });
+      eventEmitter.addListener('onLoad', (event: any) => {
+        requestAnimationFrame(() => {
+          _player.current.measure((_: any, __: any, ___: any, height: any) => {
+            setMaxHeight(parseInt((height - 1).toString(), 10));
+          });
+        });
+        return !!onLoad && onLoad({ nativeEvent: event });
+      });
+      eventEmitter.addListener('onPlay', (event: any) => {
+        requestAnimationFrame(() => {
+          _player.current.measure((_: any, __: any, ___: any, height: any) => {
+            setMaxHeight(parseInt(height.toString(), 10));
+          });
+        });
+        return !!onPlaying && onPlaying({ nativeEvent: event });
+      });
       eventEmitter.addListener(
         'onPause',
         (event: any) => !!onPause && onPause({ nativeEvent: event })
@@ -140,6 +150,7 @@ export default ({
 
   return (
     <ReactNativeBitmovinPlayer
+      ref={_player}
       {...{
         autoPlay,
         hasZoom,
@@ -156,7 +167,15 @@ export default ({
         configuration,
         analytics,
       }}
-      style={[styles, style]}
+      style={[
+        maxHeight
+          ? {
+              maxHeight,
+            }
+          : null,
+        style,
+        styles,
+      ]}
     />
   );
 };

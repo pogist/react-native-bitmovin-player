@@ -30,15 +30,15 @@ export default function App() {
     <View style={styles.container}>
       <ReactNativeBitmovinPlayer
         autoPlay={true}
-        style={
-          Platform.OS === 'android'
-            ? {
-                height: loading ? height : '100%',
-                width: '100%',
-                flex: 0,
-              }
-            : {}
-        }
+        // style={
+        //   Platform.OS === 'android'
+        //     ? {
+        //         height: loading ? height : '100%',
+        //         width: '100%',
+        //         flex: 0,
+        //       }
+        //     : {}
+        // }
         // style={{ height: 300, width: 300, flex: 0 }}
         configuration={{
           title: 'The Brown',

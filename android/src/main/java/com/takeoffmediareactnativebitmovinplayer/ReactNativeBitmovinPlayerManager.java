@@ -492,7 +492,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
   private void setListeners() {
     _player.addEventListener((OnReadyListener) event -> {
       WritableMap map = Arguments.createMap();
-
+      map.putString("message", "load");
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onReady",

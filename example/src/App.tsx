@@ -1,10 +1,7 @@
 import * as React from 'react';
 
-import { Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
-import ReactNativeBitmovinPlayer, {
-  ReactNativeBitmovinPlayerIntance,
-} from '@takeoffmedia/react-native-bitmovin-player';
-import { useState } from 'react';
+import { Platform, StyleSheet } from 'react-native';
+import ReactNativeBitmovinPlayer from '@takeoffmedia/react-native-bitmovin-player';
 
 const videoUrl = Platform.select({
   ios: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
@@ -13,89 +10,62 @@ const videoUrl = Platform.select({
 });
 
 export default function App() {
-  const [loading, setLoading] = useState(false);
-  const { height } = useWindowDimensions();
-  React.useEffect(() => {
-    ReactNativeBitmovinPlayerIntance.multiply(3, 7).then((result) => {
-      console.log({ result });
-    });
-
-    setTimeout(() => {
-      setLoading(true);
-    }, 2000);
-    // ReactNativeBitmovinPlayerIntance.play();
-  }, []);
-
   return (
-    <View style={styles.container}>
-      <ReactNativeBitmovinPlayer
-        autoPlay={true}
-        style={
-          Platform.OS === 'android'
-            ? { height: loading ? height : '100%', width: '100%', flex: 0 }
-            : {}
-        }
-        // style={{ height: 300, width: 300, flex: 0 }}
-        configuration={{
-          title: 'The Brown',
-          subtitle: 'S1 · E1',
-          startOffset: 0,
-          nextPlayback: 30,
-          hasNextEpisode: false,
-          advisory: {
-            classification: 'TV-PG',
-            description: 'All Drama',
-          },
-          hearbeat: 10,
-          url: videoUrl,
-          poster:
-            'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
-          subtitles:
-            'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
-          thumbnails:
-            'https://staging-api.britbox.takeoffmedia.com/v1/thumbnail?qs=P19fZ2RhX189MTYyMzE4MDE0OF82M2ZlYzQxMjFkYTViOTMxOGIxMGJmNmUzNGM0MWIwMQ==&fn=L3RodW1ibmFpbF92MS83NDhhMzktcGlwcy1waWQtcDA5NzlseXIvdmZfcGlwcy1waWQtcDA5NzlseXJfdGh1bWJuYWlsX21hbmlmZXN0X2M2NmY3ZGFhLTNhNTgtNDk4ZC1iZGM3LWIyMDQ0YzkyNTBjYi54bWw=&ch=vod-thumb-ntham-comm-live.akamaized.net',
-        }}
-        analytics={{
-          title: 'test',
-        }}
-        onLoad={() => {
-          console.log({ event: 'load' });
-        }}
-        onPlaying={() => {
-          console.log({ event: 'play' });
-        }}
-        onPause={() => {
-          console.log({ event: 'pause' });
-        }}
-        onEvent={({ nativeEvent }) => {
-          console.log({ nativeEvent });
-        }}
-        onSeek={({ nativeEvent }) => {
-          console.log({ nativeEvent });
-        }}
-        onForward={({ nativeEvent }) => {
-          console.log({ nativeEvent });
-        }}
-        onRewind={({ nativeEvent }) => {
-          console.log({ nativeEvent });
-        }}
-      />
-    </View>
+    <ReactNativeBitmovinPlayer
+      style={styles.container}
+      autoPlay
+      configuration={{
+        title: 'It works',
+        subtitle: 'S1 · E1',
+        startOffset: 10,
+        nextPlayback: 30,
+        hasNextEpisode: false,
+        advisory: {
+          classification: 'TV-PG',
+          description: 'All Drama',
+        },
+        hearbeat: 10,
+        url: videoUrl,
+        poster:
+          'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
+        subtitles:
+          'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
+        thumbnails:
+          'https://bitdash-a.akamaihd.net/content/sintel/sprite/sprite.vtt',
+        style: {
+          uiCss:
+            'https://stagev2-app-assets.britbox.takeoffmedia.com/player/poc/css/bitmovinplayer-ui.min.css',
+          uiJs:
+            'https://stagev2-app-assets.britbox.takeoffmedia.com/player/poc/js/bitmovinplayer-ui.min.js',
+        },
+      }}
+      // analytics={{
+      //   licenseKey: '69bab32b-7905-4aa2-ae25-06edb1ebf460',
+      // }}
+      onEvent={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+      onPause={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+      onPlay={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+      onSeek={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+      onForward={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+      onRewind={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'black',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
   },
 });

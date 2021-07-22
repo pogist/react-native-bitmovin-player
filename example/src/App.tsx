@@ -10,8 +10,11 @@ const videoUrl = Platform.select({
 });
 
 export default function App() {
+  const playerRef = React.useRef<ReactNativeBitmovinPlayer>();
+
   return (
     <ReactNativeBitmovinPlayer
+      ref={playerRef}
       style={styles.container}
       autoPlay
       configuration={{
@@ -39,9 +42,6 @@ export default function App() {
             'https://stagev2-app-assets.britbox.takeoffmedia.com/player/poc/js/bitmovinplayer-ui.min.js',
         },
       }}
-      // analytics={{
-      //   licenseKey: '69bab32b-7905-4aa2-ae25-06edb1ebf460',
-      // }}
       onReady={({ nativeEvent }) => {
         console.log({ nativeEvent });
       }}

@@ -216,4 +216,15 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
       throw new ClassCastException(String.format("Cannot setZoom: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
   }
+
+  @ReactMethod
+  public void destroy(int tag, Promise promise) {
+    View playerView = getCurrentActivity().findViewById(tag);
+
+    if (playerView instanceof BitmovinPlayerView) {
+      ((BitmovinPlayerView) playerView).getPlayer().destroy();
+    } else {
+      throw new ClassCastException(String.format("Cannot destroy: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
+    }
+  }
 }

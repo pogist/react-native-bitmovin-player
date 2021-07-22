@@ -1,18 +1,15 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import {
   findNodeHandle,
   UIManager,
   NativeModules,
-  ViewPropTypes,
   requireNativeComponent,
   Platform,
   View,
 } from 'react-native';
 
 const ReactNativeBitmovinPlayerModule = NativeModules.ReactNativeBitmovinPlayer;
-
 const EMPTY_FN = () => {};
 
 const DEFAULT_CONFIGURATION = {
@@ -22,70 +19,79 @@ const DEFAULT_CONFIGURATION = {
   },
 };
 
-class BitmovinPlayer extends React.Component {
-  static propTypes = {
-    style: ViewPropTypes.style,
-    hasZoom: PropTypes.bool,
-    autoPlay: PropTypes.bool,
-    configuration: PropTypes.shape({
-      title: PropTypes.string,
-      subtitle: PropTypes.string,
-      url: PropTypes.string.isRequired,
-      startOffset: PropTypes.number,
-      nextPlayback: PropTypes.number,
-      hasNextEpisode: PropTypes.bool,
-      advisory: PropTypes.shape({
-        classification: PropTypes.string,
-        description: PropTypes.string,
-      }),
-      hearbeat: PropTypes.number,
-      poster: PropTypes.string,
-      subtitles: PropTypes.string,
-      thumbnails: PropTypes.string,
-      style: PropTypes.shape({
-        uiEnabled: PropTypes.bool,
-        systemUI: PropTypes.bool,
-        uiCss: PropTypes.string,
-        supplementalUiCss: PropTypes.string,
-        uiJs: PropTypes.string,
-        fullscreenIcon: PropTypes.bool,
-      }),
-    }).isRequired,
-    analytics: PropTypes.shape({
-      videoId: PropTypes.string,
-      title: PropTypes.string || undefined,
-      userId: PropTypes.string || undefined,
-      cdnProvider: PropTypes.string,
-      customData1: PropTypes.string,
-      customData2: PropTypes.string,
-      customData3: PropTypes.string,
-      licenseKey: PropTypes.string,
-    }),
-    onReady: PropTypes.func,
-    onEvent: PropTypes.func,
-    onPlay: PropTypes.func,
-    onPause: PropTypes.func,
-    onTimeChanged: PropTypes.func,
-    onStallStarted: PropTypes.func,
-    onStallEnded: PropTypes.func,
-    onPlaybackFinished: PropTypes.func,
-    onRenderFirstFrame: PropTypes.func,
-    onPlayerError: PropTypes.func,
-    onMuted: PropTypes.func,
-    onUnmuted: PropTypes.func,
-    onSeek: PropTypes.func,
-    onSeeked: PropTypes.func,
-    onFullscreenEnter: PropTypes.func,
-    onFullscreenExit: PropTypes.func,
-    onControlsShow: PropTypes.func,
-    onControlsHide: PropTypes.func,
-    onForward: PropTypes.func,
-    onRewind: PropTypes.func,
+type ReactNativeBitmovinPlayerType = {
+  autoPlay: boolean;
+  hasZoom: boolean;
+  deviceZoom: boolean;
+  style?: any;
+  color?: string;
+  onReady?: (event: any) => void;
+  onPlay?: (event: any) => void;
+  onPause?: (event: any) => void;
+  onEvent?: (event: any) => void;
+  onError?: (event: any) => void;
+  onSeek?: (event: any) => void;
+  onForward?: (event: any) => void;
+  onRewind?: (event: any) => void;
+  onTimeChanged?: (event: any) => void;
+  onStallStarted?: (event: any) => void;
+  onStallEnded?: (event: any) => void;
+  onPlaybackFinished?: (event: any) => void;
+  onRenderFirstFrame?: (event: any) => void;
+  onPlayerError?: (event: any) => void;
+  onMuted?: (event: any) => void;
+  onUnmuted?: (event: any) => void;
+  onSeeked?: (event: any) => void;
+  onFullscreenEnter?: (event: any) => void;
+  onFullscreenExit?: (event: any) => void;
+  onControlsShow?: (event: any) => void;
+  onControlsHide?: (event: any) => void;
+  configuration: {
+    url: string;
+    poster?: string;
+    startOffset: number;
+    hasNextEpisode: boolean;
+    subtitles?: string;
+    thumbnails?: string;
+    title?: string;
+    subtitle?: string;
+    nextPlayback?: number;
+    hearbeat?: number;
+    advisory?: {
+      classification: string;
+      description: string;
+    };
+    style?: {
+      uiEnabled?: boolean;
+      systemUI?: boolean;
+      uiCss?: string;
+      supplementalUiCss?: string;
+      uiJs?: string;
+      fullscreenIcon?: boolean;
+    };
   };
+  analytics?: {
+    videoId: string;
+    title: string;
+    userId: string;
+    cdnProvider: string;
+    customData1: string;
+    customData2: string;
+    customData3: string;
+    licenseKey: string;
+  };
+};
+
+class BitmovinPlayer extends React.Component<
+  ReactNativeBitmovinPlayerType,
+  {
+    maxHeight: any;
+  }
+> {
+  private _player: any = React.createRef();
 
   static defaultProps = {
     style: null,
-
     onReady: EMPTY_FN,
     onEvent: EMPTY_FN,
     onPlay: EMPTY_FN,
@@ -112,27 +118,30 @@ class BitmovinPlayer extends React.Component {
     maxHeight: null,
   };
 
-  _onReady = (event) => {
+  _onReady = (event: any) => {
     const { onReady, hasZoom, autoPlay } = this.props;
 
     // this need because video view stretched on initial render (RN 0.55.4)
     // TODO: check in future releases of RN
     if (Platform.OS === 'android') {
-      UIManager.measure(findNodeHandle(this._player), (x, y, w, h) => {
-        // trigger resize
-        this.setState(
-          {
-            maxHeight: h - 1,
-          },
-          () => {
-            requestAnimationFrame(() => {
-              this.setState({
-                maxHeight: h,
+      UIManager.measure(
+        findNodeHandle(this._player) as any,
+        (_, __, ___, h) => {
+          // trigger resize
+          this.setState(
+            {
+              maxHeight: h - 1,
+            },
+            () => {
+              requestAnimationFrame(() => {
+                this.setState({
+                  maxHeight: h,
+                });
               });
-            });
-          }
-        );
-      });
+            }
+          );
+        }
+      );
     }
 
     if (hasZoom) {
@@ -145,11 +154,17 @@ class BitmovinPlayer extends React.Component {
       });
     }
 
-    onReady(event);
+    if (onReady) {
+      onReady(event);
+    }
   };
 
   play = () => {
     ReactNativeBitmovinPlayerModule.play(findNodeHandle(this._player));
+  };
+
+  destroy = () => {
+    ReactNativeBitmovinPlayerModule.destroy(findNodeHandle(this._player));
   };
 
   setZoom = () => {
@@ -161,7 +176,7 @@ class BitmovinPlayer extends React.Component {
   };
 
   seek = (time = 0) => {
-    const seekTime = parseFloat(time);
+    const seekTime = parseFloat(time.toString());
 
     if (seekTime) {
       ReactNativeBitmovinPlayerModule.seek(
@@ -221,7 +236,7 @@ class BitmovinPlayer extends React.Component {
   isPlaying = () =>
     ReactNativeBitmovinPlayerModule.isPlaying(findNodeHandle(this._player));
 
-  _setRef = (ref) => {
+  _setRef = (ref: any) => {
     this._player = ref;
   };
 
@@ -254,7 +269,7 @@ class BitmovinPlayer extends React.Component {
   }
 }
 
-const ReactNativeBitmovinPlayer = requireNativeComponent(
+const ReactNativeBitmovinPlayer = requireNativeComponent<ReactNativeBitmovinPlayerType>(
   'ReactNativeBitmovinPlayer'
 );
 

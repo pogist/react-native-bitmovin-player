@@ -112,7 +112,7 @@ class BitmovinPlayer extends React.Component {
     maxHeight: null,
   };
 
-  _onReady = () => {
+  _onReady = (event) => {
     const { onReady, hasZoom, autoPlay } = this.props;
 
     // this need because video view stretched on initial render (RN 0.55.4)
@@ -145,7 +145,7 @@ class BitmovinPlayer extends React.Component {
       });
     }
 
-    onReady();
+    onReady(event);
   };
 
   play = () => {

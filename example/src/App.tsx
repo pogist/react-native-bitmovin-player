@@ -42,6 +42,9 @@ export default function App() {
       // analytics={{
       //   licenseKey: '69bab32b-7905-4aa2-ae25-06edb1ebf460',
       // }}
+      onReady={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
       onEvent={({ nativeEvent }) => {
         console.log({ nativeEvent });
       }}

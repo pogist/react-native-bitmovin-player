@@ -500,7 +500,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onReady",
         map);
     });
-
     _player.addEventListener((OnPlayListener) event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "play");
@@ -513,7 +512,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onPlay",
         map);
     });
-
     _player.addEventListener((OnPausedListener) event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "pause");
@@ -526,7 +524,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onPause",
         map);
     });
-
     _player.addEventListener((OnTimeChangedListener) event -> {
 
       // next
@@ -559,7 +556,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
           "onEvent",
           map);
       }
-
 
     });
 

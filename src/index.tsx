@@ -61,24 +61,15 @@ type ReactNativeBitmovinPlayerType = {
       classification: string;
       description: string;
     };
-    style?: {
-      uiEnabled?: boolean;
-      systemUI?: boolean;
-      uiCss?: string;
-      supplementalUiCss?: string;
-      uiJs?: string;
-      fullscreenIcon?: boolean;
-    };
   };
   analytics?: {
     videoId: string;
-    title: string;
-    userId: string;
+    title?: string;
+    userId?: string;
     cdnProvider: string;
     customData1: string;
     customData2: string;
     customData3: string;
-    licenseKey: string;
   };
 };
 
@@ -118,30 +109,31 @@ class BitmovinPlayer extends React.Component<
     maxHeight: null,
   };
 
+  fixVideoAndroid = () => {
+    // this need because video view stretched on initial render (RN 0.55.4)
+    // TODO: check in future releases of RN
+    UIManager.measure(findNodeHandle(this._player) as any, (_, __, ___, h) => {
+      // trigger resize
+      this.setState(
+        {
+          maxHeight: h - 1,
+        },
+        () => {
+          requestAnimationFrame(() => {
+            this.setState({
+              maxHeight: h,
+            });
+          });
+        }
+      );
+    });
+  };
+
   _onReady = (event: any) => {
     const { onReady, hasZoom, autoPlay } = this.props;
 
-    // this need because video view stretched on initial render (RN 0.55.4)
-    // TODO: check in future releases of RN
     if (Platform.OS === 'android') {
-      UIManager.measure(
-        findNodeHandle(this._player) as any,
-        (_, __, ___, h) => {
-          // trigger resize
-          this.setState(
-            {
-              maxHeight: h - 1,
-            },
-            () => {
-              requestAnimationFrame(() => {
-                this.setState({
-                  maxHeight: h,
-                });
-              });
-            }
-          );
-        }
-      );
+      this.fixVideoAndroid();
     }
 
     if (hasZoom) {
@@ -159,6 +151,18 @@ class BitmovinPlayer extends React.Component<
     }
   };
 
+  _onPlay = (event: any) => {
+    const { onPlay } = this.props;
+
+    if (Platform.OS === 'android') {
+      this.fixVideoAndroid();
+    }
+
+    if (onPlay) {
+      onPlay(event);
+    }
+  };
+
   play = () => {
     ReactNativeBitmovinPlayerModule.play(findNodeHandle(this._player));
   };
@@ -169,6 +173,10 @@ class BitmovinPlayer extends React.Component<
 
   setZoom = () => {
     ReactNativeBitmovinPlayerModule.setZoom(findNodeHandle(this._player));
+  };
+
+  setFit = () => {
+    ReactNativeBitmovinPlayerModule.setFit(findNodeHandle(this._player));
   };
 
   pause = () => {
@@ -251,6 +259,7 @@ class BitmovinPlayer extends React.Component<
           {...this.props}
           ref={this._setRef}
           onReady={this._onReady}
+          onPlay={this._onPlay}
           configuration={{
             ...DEFAULT_CONFIGURATION,
             ...configuration,

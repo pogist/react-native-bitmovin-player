@@ -35,12 +35,6 @@ export default function App() {
           'https://bitdash-a.akamaihd.net/content/sintel/subtitles/subtitles_en.vtt',
         thumbnails:
           'https://bitdash-a.akamaihd.net/content/sintel/sprite/sprite.vtt',
-        style: {
-          uiCss:
-            'https://stagev2-app-assets.britbox.takeoffmedia.com/player/poc/css/bitmovinplayer-ui.min.css',
-          uiJs:
-            'https://stagev2-app-assets.britbox.takeoffmedia.com/player/poc/js/bitmovinplayer-ui.min.js',
-        },
       }}
       onReady={({ nativeEvent }) => {
         console.log({ nativeEvent });

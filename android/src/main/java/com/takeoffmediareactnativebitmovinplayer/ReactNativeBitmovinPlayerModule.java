@@ -2,8 +2,8 @@ package com.takeoffmediareactnativebitmovinplayer;
 
 import android.view.View;
 
-import com.bitmovin.player.BitmovinPlayerView;
-import com.bitmovin.player.ui.ScalingMode;
+import com.bitmovin.player.PlayerView;
+import com.bitmovin.player.api.ui.ScalingMode;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -29,8 +29,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void play(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().play();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().play();
     } else {
       throw new ClassCastException(String.format("Cannot play: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -40,8 +40,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void pause(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().pause();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().pause();
     } else {
       throw new ClassCastException(String.format("Cannot pause: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -51,8 +51,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void seek(int tag, double time) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().seek(time);
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().seek(time);
     } else {
       throw new ClassCastException(String.format("Cannot seek: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -62,8 +62,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void mute(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().mute();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().mute();
     } else {
       throw new ClassCastException(String.format("Cannot mute: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -73,8 +73,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void unmute(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().unmute();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().unmute();
     } else {
       throw new ClassCastException(String.format("Cannot unmute: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -84,8 +84,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void enterFullscreen(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).enterFullscreen();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).enterFullscreen();
     } else {
       throw new ClassCastException(String.format("Cannot enterFullscreen: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -95,8 +95,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void exitFullscreen(int tag) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).exitFullscreen();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).exitFullscreen();
     } else {
       throw new ClassCastException(String.format("Cannot exitFullscreen: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -106,8 +106,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void getCurrentTime(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      double currentTime = ((BitmovinPlayerView) playerView).getPlayer().getCurrentTime();
+    if (playerView instanceof PlayerView) {
+      double currentTime = ((PlayerView) playerView).getPlayer().getCurrentTime();
 
       promise.resolve(currentTime);
     } else {
@@ -119,8 +119,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void getDuration(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      double duration = ((BitmovinPlayerView) playerView).getPlayer().getDuration();
+    if (playerView instanceof PlayerView) {
+      double duration = ((PlayerView) playerView).getPlayer().getDuration();
 
       promise.resolve(duration);
     } else {
@@ -132,8 +132,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void getVolume(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      int volume = ((BitmovinPlayerView) playerView).getPlayer().getVolume();
+    if (playerView instanceof PlayerView) {
+      int volume = ((PlayerView) playerView).getPlayer().getVolume();
 
       promise.resolve(volume);
     } else {
@@ -145,8 +145,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void setVolume(int tag, int volume) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().setVolume(volume);
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().setVolume(volume);
     } else {
       throw new ClassCastException(String.format("Cannot setVolume: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }
@@ -156,8 +156,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void isMuted(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      boolean isMuted = ((BitmovinPlayerView) playerView).getPlayer().isMuted();
+    if (playerView instanceof PlayerView) {
+      boolean isMuted = ((PlayerView) playerView).getPlayer().isMuted();
 
       promise.resolve(isMuted);
     } else {
@@ -169,8 +169,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void isPaused(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      boolean isPaused = ((BitmovinPlayerView) playerView).getPlayer().isPaused();
+    if (playerView instanceof PlayerView) {
+      boolean isPaused = ((PlayerView) playerView).getPlayer().isPaused();
 
       promise.resolve(isPaused);
     } else {
@@ -182,8 +182,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void isStalled(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      boolean isStalled = ((BitmovinPlayerView) playerView).getPlayer().isStalled();
+    if (playerView instanceof PlayerView) {
+      boolean isStalled = ((PlayerView) playerView).getPlayer().isStalled();
 
       promise.resolve(isStalled);
     } else {
@@ -195,8 +195,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void isPlaying(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      boolean isPlaying = ((BitmovinPlayerView) playerView).getPlayer().isPlaying();
+    if (playerView instanceof PlayerView) {
+      boolean isPlaying = ((PlayerView) playerView).getPlayer().isPlaying();
 
       promise.resolve(isPlaying);
     } else {
@@ -208,8 +208,8 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   public void setZoom(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).setScalingMode(ScalingMode.Zoom);
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).setScalingMode(ScalingMode.Zoom);
 
       promise.resolve(true);
     } else {
@@ -218,11 +218,24 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   }
 
   @ReactMethod
+  public void setFit(int tag, Promise promise) {
+    View playerView = getCurrentActivity().findViewById(tag);
+
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).setScalingMode(ScalingMode.Fit);
+
+      promise.resolve(true);
+    } else {
+      throw new ClassCastException(String.format("Cannot setFit: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
+    }
+  }
+
+  @ReactMethod
   public void destroy(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 
-    if (playerView instanceof BitmovinPlayerView) {
-      ((BitmovinPlayerView) playerView).getPlayer().destroy();
+    if (playerView instanceof PlayerView) {
+      ((PlayerView) playerView).getPlayer().destroy();
     } else {
       throw new ClassCastException(String.format("Cannot destroy: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
     }

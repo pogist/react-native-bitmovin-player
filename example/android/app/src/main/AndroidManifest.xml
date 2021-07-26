@@ -21,6 +21,9 @@
         </intent-filter>
       </activity>
       <meta-data android:name="BITMOVIN_PLAYER_LICENSE_KEY" android:value="@string/BITMOVIN_PLAYER_LICENSE_KEY"/>
+      <meta-data android:name="BITMOVIN_ANALYTICS_LICENSE_KEY" android:value="@string/BITMOVIN_ANALYTICS_LICENSE_KEY"/>
+      <meta-data android:name="BITMOVIN_PLAYER_CSS" android:value="@string/BITMOVIN_PLAYER_CSS"/>
+      <meta-data android:name="BITMOVIN_PLAYER_JS" android:value="@string/BITMOVIN_PLAYER_JS"/>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
     </application>
 

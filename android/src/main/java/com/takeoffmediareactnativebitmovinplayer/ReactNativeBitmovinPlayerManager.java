@@ -1,29 +1,23 @@
 package com.takeoffmediareactnativebitmovinplayer;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.webkit.JavascriptInterface;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
 import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
-import com.bitmovin.player.api.event.listener.OnReadyListener;
-import com.bitmovin.player.api.event.listener.OnPlayListener;
-import com.bitmovin.player.api.event.listener.OnPausedListener;
-import com.bitmovin.player.api.event.listener.OnTimeChangedListener;
-import com.bitmovin.player.api.event.listener.OnStallStartedListener;
-import com.bitmovin.player.api.event.listener.OnStallEndedListener;
-import com.bitmovin.player.api.event.listener.OnPlaybackFinishedListener;
-import com.bitmovin.player.api.event.listener.OnRenderFirstFrameListener;
-import com.bitmovin.player.api.event.listener.OnErrorListener;
-import com.bitmovin.player.api.event.listener.OnMutedListener;
-import com.bitmovin.player.api.event.listener.OnUnmutedListener;
-import com.bitmovin.player.api.event.listener.OnSeekListener;
-import com.bitmovin.player.api.event.listener.OnSeekedListener;
-import com.bitmovin.player.api.event.listener.OnFullscreenEnterListener;
-import com.bitmovin.player.api.event.listener.OnFullscreenExitListener;
-import com.bitmovin.player.config.PlayerConfiguration;
-import com.bitmovin.player.BitmovinPlayer;
-import com.bitmovin.player.BitmovinPlayerView;
+import com.bitmovin.player.PlayerView;
+import com.bitmovin.player.api.Player;
+import com.bitmovin.player.api.PlayerConfig;
+import com.bitmovin.player.api.event.PlayerEvent;
+import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
+import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
+import com.bitmovin.player.api.source.Source;
+import com.bitmovin.player.api.source.SourceConfig;
+import com.bitmovin.player.api.source.SourceType;
+import com.bitmovin.player.api.ui.FullscreenHandler;
+import com.bitmovin.player.api.ui.StyleConfig;
 import com.bitmovin.player.ui.CustomMessageHandler;
-import com.bitmovin.player.ui.FullscreenHandler;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -43,12 +37,13 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<BitmovinPlayerView> implements FullscreenHandler, LifecycleEventListener {
+public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerView> implements FullscreenHandler, LifecycleEventListener {
 
   public static final String REACT_CLASS = "ReactNativeBitmovinPlayer";
 
-  private BitmovinPlayerView _playerView;
-  private BitmovinPlayer _player;
+  private BitmovinPlayerCollector analyticsCollector;
+  private PlayerView _playerView;
+  private Player _player;
   private boolean _fullscreen;
   private ThemedReactContext _reactContext;
   private Integer heartbeat = 30;
@@ -56,6 +51,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
   private boolean nextCallback = false;
   private boolean customSeek = false;
   private ReadableMap configuration = null;
+  private final PlayerConfig playerConfig = new PlayerConfig();
 
   @NotNull
   @Override
@@ -204,6 +200,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
       _player.destroy();
+      if (analyticsCollector != null) {
+        analyticsCollector.detachPlayer();
+      }
       try {
         _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
           _playerView.getId(),
@@ -221,6 +220,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
       _player.destroy();
+      if (analyticsCollector != null) {
+        analyticsCollector.detachPlayer();
+      }
       try {
         _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
           _playerView.getId(),
@@ -269,30 +271,37 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
   };
 
   // Setup CustomMessageHandler for communication with Bitmovin Web UI
+  private final CustomMessageHandler customMessageHandler = new CustomMessageHandler(javascriptInterface);
 
   @NotNull
   @Override
-  public BitmovinPlayerView createViewInstance(@NotNull ThemedReactContext context) {
+  public PlayerView createViewInstance(@NotNull ThemedReactContext context) {
     _reactContext = context;
-    _playerView = new BitmovinPlayerView(context);
+    try {
+      ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(),PackageManager.GET_META_DATA);
+      String BITMOVIN_CSS = appInfo.metaData.getString("BITMOVIN_PLAYER_CSS");
+      String BITMOVIN_JS = appInfo.metaData.getString("BITMOVIN_PLAYER_JS");
+      if (!BITMOVIN_CSS.equals("") && !BITMOVIN_JS.equals("")) {
+        StyleConfig styleConfig = new StyleConfig();
+        styleConfig.setPlayerUiCss(BuildConfig.BITMOVIN_CSS);
+        styleConfig.setPlayerUiJs(BuildConfig.BITMOVIN_JS);
+        playerConfig.setStyleConfig(styleConfig);
 
-    CustomMessageHandler customMessageHandler = new CustomMessageHandler(javascriptInterface);
-
-    // Set the CustomMessageHandler to the playerView
+      }
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
+    }
+    _player = Player.create(context, playerConfig);
+    _playerView = new PlayerView(context, _player);
     _playerView.setCustomMessageHandler(customMessageHandler);
-
-    _player = _playerView.getPlayer();
     _fullscreen = false;
-
     setListeners();
-
     nextCallback = false;
-
     return _playerView;
   }
 
   @Override
-  public void onDropViewInstance(@NotNull BitmovinPlayerView view) {
+  public void onDropViewInstance(@NotNull PlayerView view) {
     _playerView.onDestroy();
 
     super.onDropViewInstance(view);
@@ -302,7 +311,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
   }
 
   @ReactProp(name = "analytics")
-  public void setAnalytics(BitmovinPlayerView view, ReadableMap analytics) {
+  public void setAnalytics(PlayerView view, ReadableMap analytics) {
     String title = "";
     String videoId = "";
     String userId = "";
@@ -331,12 +340,16 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
     if (analytics != null && analytics.getString("customData3") != null) {
       customData3 = analytics.getString("customData3");
     }
-    if (
-      analytics != null && analytics.getString("licenseKey") != null &&
-        !analytics.getString("licenseKey").equals("")
-    ) {
+    try {
+      ApplicationInfo appInfo = _reactContext.getPackageManager().getApplicationInfo(_reactContext.getPackageName(),PackageManager.GET_META_DATA);
+      String BITMOVIN_ANALYTICS_LICENSE_KEY = appInfo.metaData.getString("BITMOVIN_ANALYTICS_LICENSE_KEY");
+
+      if (
+        analytics != null && BITMOVIN_ANALYTICS_LICENSE_KEY != null &&
+          !BITMOVIN_ANALYTICS_LICENSE_KEY.equals("")
+      ) {
       // Create a BitmovinAnalyticsConfig using your Bitmovin analytics license key and (optionally) your Bitmovin Player Key
-      BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(analytics.getString("licenseKey"));
+      BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(BITMOVIN_ANALYTICS_LICENSE_KEY);
       bitmovinAnalyticsConfig.setVideoId(videoId);
       bitmovinAnalyticsConfig.setTitle(title);
       bitmovinAnalyticsConfig.setCustomUserId(userId);
@@ -346,73 +359,37 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
       bitmovinAnalyticsConfig.setCustomData3(customData3);
 
       // Create a BitmovinPlayerCollector object using the BitmovinAnalyitcsConfig you just created
-      BitmovinPlayerCollector analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, _reactContext);
+      analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, _reactContext);
 
       // Attach your player instance
       analyticsCollector.attachPlayer(_player);
-    } else {
-      throw new ClassCastException("Cannot connect Analytics, add you license key.");
+
+      } else {
+        throw new ClassCastException("Cannot connect Analytics, add you license key.");
+      }
+    } catch (PackageManager.NameNotFoundException e) {
+      e.printStackTrace();
     }
   }
 
   @ReactProp(name = "configuration")
-  public void setConfiguration(BitmovinPlayerView view, ReadableMap config) {
+  public void setConfiguration(PlayerView view, ReadableMap config) {
     configuration = config;
-    PlayerConfiguration configuration = new PlayerConfiguration();
-
-    ReadableMap styleMap = null;
     String advisory;
     boolean hasNextEpisode;
 
     if (config != null && config.getString("url") != null) {
-      configuration.setSourceItem(Objects.requireNonNull(config.getString("url")));
-
-      if (config.getString("title") != null) {
-        Objects.requireNonNull(configuration.getSourceItem()).setTitle(config.getString("title"));
-      }
-
-      if (config.getString("subtitle") != null) {
-        Objects.requireNonNull(configuration.getSourceItem()).setDescription(config.getString("subtitle"));
-      }
-
-
-      if (config.getString("poster") != null) {
-        Objects.requireNonNull(configuration.getSourceItem()).setPosterImage(config.getString("poster"), false);
-      }
-      Objects.requireNonNull(configuration.getStyleConfiguration()).setHideFirstFrame(true);
-
-      if (config.hasKey("style")) {
-        styleMap = config.getMap("style");
-      }
-
-      if (styleMap != null) {
-        if (styleMap.hasKey("uiEnabled") && !styleMap.getBoolean("uiEnabled")) {
-          configuration.getStyleConfiguration().setUiEnabled(false);
-        }
-
-        if (styleMap.hasKey("uiCss") && styleMap.getString("uiCss") != null) {
-          configuration.getStyleConfiguration().setPlayerUiCss(styleMap.getString("uiCss"));
-        }
-
-        if (styleMap.hasKey("supplementalUiCss") && styleMap.getString("supplementalUiCss") != null) {
-          configuration.getStyleConfiguration().setSupplementalPlayerUiCss(styleMap.getString("supplementalUiCss"));
-        }
-
-        if (styleMap.hasKey("uiJs") && styleMap.getString("uiJs") != null) {
-          configuration.getStyleConfiguration().setPlayerUiJs(styleMap.getString("uiJs"));
-        }
-
-        if (styleMap.hasKey("fullscreenIcon") && styleMap.getBoolean("fullscreenIcon")) {
-          _playerView.setFullscreenHandler(this);
-        }
-
-      }
-
-      if (config.hasKey("startOffset")) {
-        Objects.requireNonNull(configuration.getSourceConfiguration()).setStartOffset(config.getDouble("startOffset"));
-      }
 
       hasNextEpisode = config.getBoolean("hasNextEpisode");
+
+      if (config.getString("heartbeat") != null) {
+        heartbeat = Integer.valueOf(config.getString("hearbeat"));
+      }
+
+      SourceConfig sourceConfigNew = new SourceConfig(
+        Objects.requireNonNull(config.getString("url")),
+        SourceType.Dash
+      );
 
       if (config.getMap("advisory") != null) {
         HashMap metaDataMap = new HashMap();
@@ -423,36 +400,41 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         } catch (JSONException e) {
           e.printStackTrace();
         }
-        Objects.requireNonNull(configuration.getSourceItem()).setMetadata(metaDataMap);
+
+        sourceConfigNew.setMetadata(metaDataMap);
       }
 
-      if (config.getString("subtitles") != null) {
-        Objects.requireNonNull(configuration.getSourceItem()).addSubtitleTrack(
-          config.getString("subtitles"),
-          null,
-          "en",
-          "en",
-          false,
-          "en"
-        );
+      if (config.getString("title") != null) {
+        sourceConfigNew.setTitle(Objects.requireNonNull(config.getString("title")));
+      }
+
+      if (config.getString("subtitle") != null) {
+        sourceConfigNew.setDescription(Objects.requireNonNull(config.getString("subtitle")));
       }
 
       if (config.getString("thumbnails") != null) {
-        Objects.requireNonNull(configuration.getSourceItem()).addThumbnailTrack(config.getString("thumbnails"));
+        ThumbnailTrack thumbnailTrack = new ThumbnailTrack(Objects.requireNonNull(config.getString("thumbnails")));
+        sourceConfigNew.setThumbnailTrack(thumbnailTrack);
       }
 
-      if (config.getString("heartbeat") != null) {
-        heartbeat = Integer.valueOf(config.getString("hearbeat"));
+      if (config.getString("poster") != null) {
+        sourceConfigNew.setPosterImage(Objects.requireNonNull(config.getString("poster")), false);
       }
 
-      _player.setup(configuration);
+      if (config.getString("subtitles") != null) {
+        SubtitleTrack subtitleTrack = new SubtitleTrack(config.getString("subtitles"), null, "en", "en", false, "en");
+        sourceConfigNew.addSubtitleTrack(subtitleTrack);
+      }
+
+      if (config.hasKey("startOffset")) {
+        sourceConfigNew.getOptions().setStartOffset(config.getDouble("startOffset"));
+      }
+
+      Source source = Source.create(sourceConfigNew);
+
+      _player.load(source);
 
     }
-  }
-
-  @Override
-  public boolean isFullScreen() {
-    return _fullscreen;
   }
 
   @Override
@@ -490,7 +472,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
   }
 
   private void setListeners() {
-    _player.addEventListener((OnReadyListener) event -> {
+    _player.on(PlayerEvent.Ready.class, event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "load");
       map.putString("volume", String.valueOf(_player.getVolume()));
@@ -500,7 +482,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onReady",
         map);
     });
-    _player.addEventListener((OnPlayListener) event -> {
+    _player.on(PlayerEvent.Play.class, event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "play");
       map.putDouble("time", event.getTime());
@@ -512,7 +494,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onPlay",
         map);
     });
-    _player.addEventListener((OnPausedListener) event -> {
+    _player.on(PlayerEvent.Paused.class, event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "pause");
       map.putDouble("time", event.getTime());
@@ -524,8 +506,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onPause",
         map);
     });
-    _player.addEventListener((OnTimeChangedListener) event -> {
-
+    _player.on(PlayerEvent.TimeChanged.class, event -> {
       // next
       if (configuration != null && configuration.hasKey("nextPlayback")) {
         if (event.getTime() <= _player.getDuration() - (configuration.getDouble("nextPlayback")) && nextCallback) {
@@ -558,26 +539,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
       }
 
     });
-
-    _player.addEventListener((OnStallStartedListener) event -> {
-      WritableMap map = Arguments.createMap();
-
-      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-        _playerView.getId(),
-        "onStallStarted",
-        map);
-    });
-
-    _player.addEventListener((OnStallEndedListener) event -> {
-      WritableMap map = Arguments.createMap();
-
-      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-        _playerView.getId(),
-        "onStallEnded",
-        map);
-    });
-
-    _player.addEventListener((OnPlaybackFinishedListener) event -> {
+    _player.on(PlayerEvent.PlaybackFinished.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -585,8 +547,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onPlaybackFinished",
         map);
     });
-
-    _player.addEventListener((OnRenderFirstFrameListener) event -> {
+    _player.on(PlayerEvent.RenderFirstFrame.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -594,14 +555,11 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onRenderFirstFrame",
         map);
     });
-
-    _player.addEventListener((OnErrorListener) event -> {
+    _player.on(PlayerEvent.Error.class, event -> {
       WritableMap map = Arguments.createMap();
       WritableMap errorMap = Arguments.createMap();
-
-      errorMap.putInt("code", event.getCode());
+      errorMap.putInt("code", Integer.parseInt(String.valueOf(event.getCode())));
       errorMap.putString("message", event.getMessage());
-
       map.putMap("error", errorMap);
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -609,8 +567,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onError",
         map);
     });
-
-    _player.addEventListener((OnMutedListener) event -> {
+    _player.on(PlayerEvent.Muted.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -618,8 +575,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onMuted",
         map);
     });
-
-    _player.addEventListener((OnUnmutedListener) event -> {
+    _player.on(PlayerEvent.Unmuted.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -627,13 +583,11 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onUnmuted",
         map);
     });
-
-    _player.addEventListener((OnSeekListener) event -> {
+    _player.on(PlayerEvent.Seek.class, event -> {
       WritableMap map = Arguments.createMap();
       map.putString("message", "seek");
       map.putString("time", String.valueOf(_player.getCurrentTime()));
-      map.putDouble("seekTarget", event.getSeekTarget());
-      map.putDouble("position", event.getPosition());
+      map.putDouble("position", event.getTimestamp());
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
       if (customSeek) {
@@ -645,8 +599,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
           map);
       }
     });
-
-    _player.addEventListener((OnSeekedListener) event -> {
+    _player.on(PlayerEvent.Seeked.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -654,8 +607,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onSeeked",
         map);
     });
-
-    _player.addEventListener((OnFullscreenEnterListener) event -> {
+    _player.on(PlayerEvent.FullscreenEnter.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -663,8 +615,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         "onFullscreenEnter",
         map);
     });
-
-    _player.addEventListener((OnFullscreenExitListener) event -> {
+    _player.on(PlayerEvent.FullscreenExit.class, event -> {
       WritableMap map = Arguments.createMap();
 
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -673,5 +624,10 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<Bitmovin
         map);
       }
     );
+  }
+
+  @Override
+  public boolean isFullscreen() {
+    return _fullscreen;
   }
 }

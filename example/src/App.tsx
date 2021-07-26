@@ -1,7 +1,9 @@
 import * as React from 'react';
 
 import { Platform, StyleSheet } from 'react-native';
-import ReactNativeBitmovinPlayer from '@takeoffmedia/react-native-bitmovin-player';
+import ReactNativeBitmovinPlayer, {
+  ReactNativeBitmovinPlayerMethodsType,
+} from '@takeoffmedia/react-native-bitmovin-player';
 
 const videoUrl = Platform.select({
   ios: 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
@@ -10,7 +12,7 @@ const videoUrl = Platform.select({
 });
 
 export default function App() {
-  const playerRef = React.useRef<ReactNativeBitmovinPlayer>();
+  const playerRef = React.useRef<ReactNativeBitmovinPlayerMethodsType>();
 
   return (
     <ReactNativeBitmovinPlayer

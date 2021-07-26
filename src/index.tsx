@@ -19,10 +19,17 @@ const DEFAULT_CONFIGURATION = {
   },
 };
 
+export type ReactNativeBitmovinPlayerMethodsType = {
+  play(): void;
+  pause(): void;
+  destroy(): void;
+  seekBackwardCommand(): void;
+  seekForwardCommand(): void;
+};
+
 type ReactNativeBitmovinPlayerType = {
   autoPlay: boolean;
   hasZoom: boolean;
-  deviceZoom: boolean;
   style?: any;
   color?: string;
   onReady?: (event: any) => void;
@@ -79,7 +86,7 @@ class BitmovinPlayer extends React.Component<
     maxHeight: any;
   }
 > {
-  private _player: any = React.createRef();
+  private _player: any = React.createRef<ReactNativeBitmovinPlayerMethodsType>();
 
   static defaultProps = {
     style: null,
@@ -136,7 +143,7 @@ class BitmovinPlayer extends React.Component<
       this.fixVideoAndroid();
     }
 
-    if (hasZoom) {
+    if (hasZoom && Platform.OS === 'android') {
       this.setZoom();
     }
 
@@ -164,11 +171,27 @@ class BitmovinPlayer extends React.Component<
   };
 
   play = () => {
-    ReactNativeBitmovinPlayerModule.play(findNodeHandle(this._player));
+    if (Platform.OS === 'android') {
+      ReactNativeBitmovinPlayerModule.play(findNodeHandle(this._player));
+    } else {
+      ReactNativeBitmovinPlayerModule.play();
+    }
+  };
+
+  seekBackwardCommand = () => {
+    ReactNativeBitmovinPlayerModule.seekBackwardCommand();
+  };
+
+  seekForwardCommand = () => {
+    ReactNativeBitmovinPlayerModule.seekForwardCommand();
   };
 
   destroy = () => {
-    ReactNativeBitmovinPlayerModule.destroy(findNodeHandle(this._player));
+    if (Platform.OS === 'android') {
+      ReactNativeBitmovinPlayerModule.destroy(findNodeHandle(this._player));
+    } else {
+      ReactNativeBitmovinPlayerModule.destroy();
+    }
   };
 
   setZoom = () => {
@@ -180,7 +203,11 @@ class BitmovinPlayer extends React.Component<
   };
 
   pause = () => {
-    ReactNativeBitmovinPlayerModule.pause(findNodeHandle(this._player));
+    if (Platform.OS === 'android') {
+      ReactNativeBitmovinPlayerModule.pause(findNodeHandle(this._player));
+    } else {
+      ReactNativeBitmovinPlayerModule.pause();
+    }
   };
 
   seek = (time = 0) => {

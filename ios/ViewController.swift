@@ -12,7 +12,6 @@ import BitmovinAnalyticsCollector
 final class ViewController: UIView {
     @objc var autoPlay: Bool = false
     @objc var hasZoom: Bool = false
-    @objc var deviceZoom: Bool = false
     @objc var configuration: NSDictionary? = nil
     @objc var analytics: NSDictionary? = nil
 
@@ -76,14 +75,14 @@ final class ViewController: UIView {
             config.sourceItem?.itemDescription = self.configuration!["subtitle"] as? String;
         }
 
-        if (self.hasZoom == true && self.deviceZoom){
+        if (self.hasZoom == true){
             // config.sourceItem?.metadata.addEntries(from: ["hasZoom": self.hasZoom])
             config.styleConfiguration.scalingMode = BMPScalingMode.zoom;
         }
 
-        if (self.autoPlay == true){
-            config.playbackConfiguration.isAutoplayEnabled = true;
-        }
+//        if (self.autoPlay == true){
+//            config.playbackConfiguration.isAutoplayEnabled = true;
+//        }
 
         player?.setup(configuration: config)
         nextCallback = false;
@@ -153,9 +152,9 @@ final class ViewController: UIView {
         self.addSubview(playerView)
     }
 
-    @objc var onLoad:RCTDirectEventBlock? = nil
+    @objc var onReady:RCTDirectEventBlock? = nil
     @objc var onAirPlay:RCTDirectEventBlock? = nil
-    @objc var onPlaying:RCTDirectEventBlock? = nil
+    @objc var onPlay:RCTDirectEventBlock? = nil
     @objc var onPause:RCTDirectEventBlock? = nil
     @objc var onEvent:RCTDirectEventBlock? = nil
     @objc var onError:RCTDirectEventBlock? = nil
@@ -315,8 +314,9 @@ extension ViewController: PlayerListener {
 
     func onPlay(_ event: PlayEvent) {
         print("onPlay \(event.name)")
-        if((self.onPlaying) != nil && self.player!.duration > 0) {
-            self.onPlaying!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+        let playCallback = self.onPlay;
+        if((playCallback) != nil && self.player!.duration > 0) {
+            playCallback!(["message": "play", "time": self.player?.currentTime as Any, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 
@@ -338,8 +338,9 @@ extension ViewController: PlayerListener {
 
     func onReady(_ event: ReadyEvent) {
         print("onReady \(event.name)")
-        if((self.onLoad) != nil) {
-            self.onLoad!(["message": "load", "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+        let readyCallback = self.onReady;
+        if((readyCallback) != nil) {
+            readyCallback!(["message": "load", "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 
@@ -376,8 +377,9 @@ extension ViewController: PlayerListener {
 
     func onError(_ event: ErrorEvent) {
         print("onError \(event.message)")
-        if((self.onError) != nil) {
-            self.onError!(["message": event.message, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
+        let errorCallback = self.onError;
+        if((errorCallback) != nil) {
+            errorCallback!(["message": event.message, "volume": self.player?.volume as Any, "duration": self.player?.duration as Any])
         }
     }
 }

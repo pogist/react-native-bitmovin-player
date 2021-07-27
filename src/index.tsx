@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import {
   findNodeHandle,
-  UIManager,
   NativeModules,
   requireNativeComponent,
   Platform,
   View,
+  LayoutRectangle,
 } from 'react-native';
 
 const ReactNativeBitmovinPlayerModule = NativeModules.ReactNativeBitmovinPlayer;
-const EMPTY_FN = () => {};
 
 const DEFAULT_CONFIGURATION = {
   style: {
@@ -34,6 +33,7 @@ type ReactNativeBitmovinPlayerType = {
   color?: string;
   onReady?: (event: any) => void;
   onPlay?: (event: any) => void;
+  onAirPlay?: (event: any) => void;
   onPause?: (event: any) => void;
   onEvent?: (event: any) => void;
   onError?: (event: any) => void;
@@ -80,217 +80,237 @@ type ReactNativeBitmovinPlayerType = {
   };
 };
 
-class BitmovinPlayer extends React.Component<
-  ReactNativeBitmovinPlayerType,
-  {
-    maxHeight: any;
-  }
-> {
-  private _player: any = React.createRef<ReactNativeBitmovinPlayerMethodsType>();
+const ReactNativeBitmovinPlayer = requireNativeComponent<ReactNativeBitmovinPlayerType>(
+  'ReactNativeBitmovinPlayer'
+);
 
-  static defaultProps = {
-    style: null,
-    onReady: EMPTY_FN,
-    onEvent: EMPTY_FN,
-    onPlay: EMPTY_FN,
-    onPause: EMPTY_FN,
-    onTimeChanged: EMPTY_FN,
-    onStallStarted: EMPTY_FN,
-    onStallEnded: EMPTY_FN,
-    onPlaybackFinished: EMPTY_FN,
-    onRenderFirstFrame: EMPTY_FN,
-    onPlayerError: EMPTY_FN,
-    onMuted: EMPTY_FN,
-    onUnmuted: EMPTY_FN,
-    onSeek: EMPTY_FN,
-    onSeeked: EMPTY_FN,
-    onFullscreenEnter: EMPTY_FN,
-    onFullscreenExit: EMPTY_FN,
-    onControlsShow: EMPTY_FN,
-    onControlsHide: EMPTY_FN,
-    onForward: EMPTY_FN,
-    onRewind: EMPTY_FN,
-  };
+export default React.forwardRef<
+  ReactNativeBitmovinPlayerMethodsType,
+  ReactNativeBitmovinPlayerType
+>(
+  (
+    {
+      configuration,
+      onReady,
+      hasZoom,
+      autoPlay,
+      style,
+      ...props
+    }: ReactNativeBitmovinPlayerType,
+    ref
+  ) => {
+    const [maxHeight, setMaxHeight] = useState<number | null>(null);
+    const [layout, setLayout] = useState<LayoutRectangle | null>(null);
+    const [loading, setLoading] = useState(false);
+    const playerRef = useRef();
 
-  state = {
-    maxHeight: null,
-  };
+    useEffect(() => {
+      const { height } = layout || {};
 
-  fixVideoAndroid = () => {
-    // this need because video view stretched on initial render (RN 0.55.4)
-    // TODO: check in future releases of RN
-    UIManager.measure(findNodeHandle(this._player) as any, (_, __, ___, h) => {
-      // trigger resize
-      this.setState(
-        {
-          maxHeight: h - 1,
-        },
-        () => {
-          requestAnimationFrame(() => {
-            this.setState({
-              maxHeight: h,
-            });
-          });
+      if (maxHeight !== null && height && !loading) {
+        setTimeout(() => {
+          setMaxHeight(height);
+        }, 250);
+      }
+
+      if (height && maxHeight === height) {
+        setLoading(true);
+      }
+    }, [maxHeight, layout, loading]);
+
+    useEffect(() => {
+      if (loading && autoPlay && Platform.OS === 'android') {
+        play();
+      }
+    }, [loading, autoPlay]);
+
+    const play = () => {
+      if (Platform.OS === 'android') {
+        ReactNativeBitmovinPlayerModule.play(
+          findNodeHandle(playerRef?.current || null)
+        );
+      } else {
+        ReactNativeBitmovinPlayerModule.play();
+      }
+    };
+
+    const pause = () => {
+      if (Platform.OS === 'android') {
+        ReactNativeBitmovinPlayerModule.pause(
+          findNodeHandle(playerRef?.current || null)
+        );
+      } else {
+        ReactNativeBitmovinPlayerModule.pause();
+      }
+    };
+
+    const seekBackwardCommand = () => {
+      ReactNativeBitmovinPlayerModule.seekBackwardCommand();
+    };
+
+    const seekForwardCommand = () => {
+      ReactNativeBitmovinPlayerModule.seekForwardCommand();
+    };
+
+    const destroy = () => {
+      if (Platform.OS === 'android') {
+        ReactNativeBitmovinPlayerModule.destroy(
+          findNodeHandle(playerRef.current || null)
+        );
+      } else {
+        ReactNativeBitmovinPlayerModule.destroy();
+      }
+    };
+
+    const setZoom = () => {
+      ReactNativeBitmovinPlayerModule.setZoom(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const setFit = () => {
+      ReactNativeBitmovinPlayerModule.setFit(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const seek = (time = 0) => {
+      const seekTime = parseFloat(time.toString());
+
+      if (seekTime) {
+        ReactNativeBitmovinPlayerModule.seek(
+          findNodeHandle(playerRef.current || null),
+          seekTime
+        );
+      }
+    };
+
+    const mute = () => {
+      ReactNativeBitmovinPlayerModule.mute(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const unmute = () => {
+      ReactNativeBitmovinPlayerModule.unmute(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const enterFullscreen = () => {
+      ReactNativeBitmovinPlayerModule.enterFullscreen(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const exitFullscreen = () => {
+      ReactNativeBitmovinPlayerModule.exitFullscreen(
+        findNodeHandle(playerRef.current || null)
+      );
+    };
+
+    const getCurrentTime = () =>
+      ReactNativeBitmovinPlayerModule.getCurrentTime(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const getDuration = () =>
+      ReactNativeBitmovinPlayerModule.getDuration(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const getVolume = () =>
+      ReactNativeBitmovinPlayerModule.getVolume(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const setVolume = (volume = 100) => {
+      ReactNativeBitmovinPlayerModule.setVolume(
+        findNodeHandle(playerRef.current || null),
+        volume
+      );
+    };
+
+    const isMuted = () =>
+      ReactNativeBitmovinPlayerModule.isMuted(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const isPaused = () =>
+      ReactNativeBitmovinPlayerModule.isPaused(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const isStalled = () =>
+      ReactNativeBitmovinPlayerModule.isStalled(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const isPlaying = () =>
+      ReactNativeBitmovinPlayerModule.isPlaying(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    useImperativeHandle(ref, () => ({
+      play,
+      pause,
+      seekBackwardCommand,
+      seekForwardCommand,
+      destroy,
+      setZoom,
+      setFit,
+      seek,
+      mute,
+      unmute,
+      enterFullscreen,
+      exitFullscreen,
+      getCurrentTime,
+      getDuration,
+      getVolume,
+      setVolume,
+      isMuted,
+      isPaused,
+      isStalled,
+      isPlaying,
+    }));
+
+    const _onReady = (event: any) => {
+      // this need because video view stretched on initial render (RN 0.55.4)
+      // TODO: check in future releases of RN
+      if (Platform.OS === 'android') {
+        if (layout && maxHeight === null) {
+          const { height } = layout;
+          setMaxHeight(height - 1);
         }
-      );
-    });
-  };
+      }
+      if (hasZoom && Platform.OS === 'android') {
+        // ReactNativeBitmovinPlayerModule.setZoom(findNodeHandle(ref.current));
+      }
 
-  _onReady = (event: any) => {
-    const { onReady, hasZoom, autoPlay } = this.props;
-
-    if (Platform.OS === 'android') {
-      this.fixVideoAndroid();
-    }
-
-    if (hasZoom && Platform.OS === 'android') {
-      this.setZoom();
-    }
-
-    if (autoPlay) {
-      requestAnimationFrame(() => {
-        this.play();
-      });
-    }
-
-    if (onReady) {
-      onReady(event);
-    }
-  };
-
-  _onPlay = (event: any) => {
-    const { onPlay } = this.props;
-
-    if (Platform.OS === 'android') {
-      this.fixVideoAndroid();
-    }
-
-    if (onPlay) {
-      onPlay(event);
-    }
-  };
-
-  play = () => {
-    if (Platform.OS === 'android') {
-      ReactNativeBitmovinPlayerModule.play(findNodeHandle(this._player));
-    } else {
-      ReactNativeBitmovinPlayerModule.play();
-    }
-  };
-
-  seekBackwardCommand = () => {
-    ReactNativeBitmovinPlayerModule.seekBackwardCommand();
-  };
-
-  seekForwardCommand = () => {
-    ReactNativeBitmovinPlayerModule.seekForwardCommand();
-  };
-
-  destroy = () => {
-    if (Platform.OS === 'android') {
-      ReactNativeBitmovinPlayerModule.destroy(findNodeHandle(this._player));
-    } else {
-      ReactNativeBitmovinPlayerModule.destroy();
-    }
-  };
-
-  setZoom = () => {
-    ReactNativeBitmovinPlayerModule.setZoom(findNodeHandle(this._player));
-  };
-
-  setFit = () => {
-    ReactNativeBitmovinPlayerModule.setFit(findNodeHandle(this._player));
-  };
-
-  pause = () => {
-    if (Platform.OS === 'android') {
-      ReactNativeBitmovinPlayerModule.pause(findNodeHandle(this._player));
-    } else {
-      ReactNativeBitmovinPlayerModule.pause();
-    }
-  };
-
-  seek = (time = 0) => {
-    const seekTime = parseFloat(time.toString());
-
-    if (seekTime) {
-      ReactNativeBitmovinPlayerModule.seek(
-        findNodeHandle(this._player),
-        seekTime
-      );
-    }
-  };
-
-  mute = () => {
-    ReactNativeBitmovinPlayerModule.mute(findNodeHandle(this._player));
-  };
-
-  unmute = () => {
-    ReactNativeBitmovinPlayerModule.unmute(findNodeHandle(this._player));
-  };
-
-  enterFullscreen = () => {
-    ReactNativeBitmovinPlayerModule.enterFullscreen(
-      findNodeHandle(this._player)
-    );
-  };
-
-  exitFullscreen = () => {
-    ReactNativeBitmovinPlayerModule.exitFullscreen(
-      findNodeHandle(this._player)
-    );
-  };
-
-  getCurrentTime = () =>
-    ReactNativeBitmovinPlayerModule.getCurrentTime(
-      findNodeHandle(this._player)
-    );
-
-  getDuration = () =>
-    ReactNativeBitmovinPlayerModule.getDuration(findNodeHandle(this._player));
-
-  getVolume = () =>
-    ReactNativeBitmovinPlayerModule.getVolume(findNodeHandle(this._player));
-
-  setVolume = (volume = 100) => {
-    ReactNativeBitmovinPlayerModule.setVolume(
-      findNodeHandle(this._player),
-      volume
-    );
-  };
-
-  isMuted = () =>
-    ReactNativeBitmovinPlayerModule.isMuted(findNodeHandle(this._player));
-
-  isPaused = () =>
-    ReactNativeBitmovinPlayerModule.isPaused(findNodeHandle(this._player));
-
-  isStalled = () =>
-    ReactNativeBitmovinPlayerModule.isStalled(findNodeHandle(this._player));
-
-  isPlaying = () =>
-    ReactNativeBitmovinPlayerModule.isPlaying(findNodeHandle(this._player));
-
-  _setRef = (ref: any) => {
-    this._player = ref;
-  };
-
-  render() {
-    const { style, configuration } = this.props;
-
-    const { maxHeight } = this.state;
+      if (onReady) {
+        onReady(event);
+      }
+    };
 
     return (
-      <View style={{ flex: 1, backgroundColor: 'black' }}>
+      <View
+        style={{ flex: 1 }}
+        onLayout={(event) => {
+          setLayout(event?.nativeEvent?.layout || null);
+        }}
+      >
         <ReactNativeBitmovinPlayer
-          {...this.props}
-          ref={this._setRef}
-          onReady={this._onReady}
-          onPlay={this._onPlay}
-          configuration={{
-            ...DEFAULT_CONFIGURATION,
-            ...configuration,
+          ref={playerRef as any}
+          {...{
+            autoPlay,
+            hasZoom,
+            configuration: {
+              ...DEFAULT_CONFIGURATION,
+              ...configuration,
+            },
+            ...props,
           }}
+          onReady={_onReady}
           style={[
             maxHeight
               ? {
@@ -298,15 +318,14 @@ class BitmovinPlayer extends React.Component<
                 }
               : null,
             style,
+            loading || Platform.OS === 'ios'
+              ? {}
+              : {
+                  opacity: 0,
+                },
           ]}
         />
       </View>
     );
   }
-}
-
-const ReactNativeBitmovinPlayer = requireNativeComponent<ReactNativeBitmovinPlayerType>(
-  'ReactNativeBitmovinPlayer'
 );
-
-export default BitmovinPlayer;

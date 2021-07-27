@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 
   s.dependency "React-Core"
 
-  s.dependency "BitmovinPlayer", "2.57.1"
+  s.dependency "BitmovinPlayer", "2.66.0"
   s.dependency "BitmovinAnalyticsCollector/Core", "1.20.0-beta2"
   s.dependency "BitmovinAnalyticsCollector/BitmovinPlayer", "1.20.0-beta2"
 

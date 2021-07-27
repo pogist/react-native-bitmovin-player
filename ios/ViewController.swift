@@ -80,9 +80,9 @@ final class ViewController: UIView {
             config.styleConfiguration.scalingMode = BMPScalingMode.zoom;
         }
 
-//        if (self.autoPlay == true){
-//            config.playbackConfiguration.isAutoplayEnabled = true;
-//        }
+        if (self.autoPlay == true){
+            config.playbackConfiguration.isAutoplayEnabled = true;
+        }
 
         player?.setup(configuration: config)
         nextCallback = false;

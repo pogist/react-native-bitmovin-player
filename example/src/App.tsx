@@ -16,9 +16,10 @@ export default function App() {
 
   return (
     <ReactNativeBitmovinPlayer
-      ref={playerRef}
+      ref={playerRef as any}
       style={styles.container}
       autoPlay
+      hasZoom={false}
       configuration={{
         title: 'It works',
         subtitle: 'S1 · E1',
@@ -66,5 +67,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'black',
   },
 });

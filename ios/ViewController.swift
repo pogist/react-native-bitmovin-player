@@ -102,6 +102,7 @@ final class ViewController: UIView {
             configAnalytics.customData1 = self.analytics!["customData1"] as? String;
             configAnalytics.customData2 = self.analytics!["customData2"] as? String;
             configAnalytics.customData3 = self.analytics!["customData3"] as? String;
+            configAnalytics.customData4 = self.analytics!["customData4"] as? String;
 
             // Create a BitmovinAnalytics object using the config just created
             analyticsCollector = BitmovinAnalytics(config: configAnalytics);

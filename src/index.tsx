@@ -77,6 +77,7 @@ type ReactNativeBitmovinPlayerType = {
     customData1: string;
     customData2: string;
     customData3: string;
+    customData4: string;
   };
 };
 
@@ -110,7 +111,7 @@ export default React.forwardRef<
       if (maxHeight !== null && height && !loading) {
         setTimeout(() => {
           setMaxHeight(height);
-        }, 250);
+        }, 500);
       }
 
       if (height && maxHeight === height) {

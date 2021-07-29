@@ -319,6 +319,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     String customData1 = "";
     String customData2 = "";
     String customData3 = "";
+    String customData4 = "";
     if (analytics != null && analytics.getString("title") != null) {
       title = analytics.getString("title");
     }
@@ -340,6 +341,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     if (analytics != null && analytics.getString("customData3") != null) {
       customData3 = analytics.getString("customData3");
     }
+    if (analytics != null && analytics.getString("customData4") != null) {
+      customData4 = analytics.getString("customData4");
+    }
     try {
       ApplicationInfo appInfo = _reactContext.getPackageManager().getApplicationInfo(_reactContext.getPackageName(),PackageManager.GET_META_DATA);
       String BITMOVIN_ANALYTICS_LICENSE_KEY = appInfo.metaData.getString("BITMOVIN_ANALYTICS_LICENSE_KEY");
@@ -357,6 +361,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       bitmovinAnalyticsConfig.setCustomData1(customData1);
       bitmovinAnalyticsConfig.setCustomData2(customData2);
       bitmovinAnalyticsConfig.setCustomData3(customData3);
+      bitmovinAnalyticsConfig.setCustomData3(customData4);
 
       // Create a BitmovinPlayerCollector object using the BitmovinAnalyitcsConfig you just created
       analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, _reactContext);

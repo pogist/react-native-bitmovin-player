@@ -361,7 +361,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       bitmovinAnalyticsConfig.setCustomData1(customData1);
       bitmovinAnalyticsConfig.setCustomData2(customData2);
       bitmovinAnalyticsConfig.setCustomData3(customData3);
-      bitmovinAnalyticsConfig.setCustomData3(customData4);
+      bitmovinAnalyticsConfig.setCustomData4(customData4);
 
       // Create a BitmovinPlayerCollector object using the BitmovinAnalyitcsConfig you just created
       analyticsCollector = new BitmovinPlayerCollector(bitmovinAnalyticsConfig, _reactContext);

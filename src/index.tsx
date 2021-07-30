@@ -29,9 +29,11 @@ export type ReactNativeBitmovinPlayerMethodsType = {
 type ReactNativeBitmovinPlayerType = {
   autoPlay: boolean;
   hasZoom: boolean;
+  hasChromecast?: boolean;
   style?: any;
   color?: string;
   onReady?: (event: any) => void;
+  onChromecast?: (event: any) => void;
   onPlay?: (event: any) => void;
   onAirPlay?: (event: any) => void;
   onPause?: (event: any) => void;
@@ -94,6 +96,7 @@ export default React.forwardRef<
       configuration,
       onReady,
       hasZoom,
+      hasChromecast,
       autoPlay,
       style,
       ...props
@@ -285,7 +288,9 @@ export default React.forwardRef<
         }
       }
       if (hasZoom && Platform.OS === 'android') {
-        // ReactNativeBitmovinPlayerModule.setZoom(findNodeHandle(ref.current));
+        ReactNativeBitmovinPlayerModule.setZoom(
+          findNodeHandle(playerRef.current || null)
+        );
       }
 
       if (onReady) {
@@ -305,6 +310,7 @@ export default React.forwardRef<
           {...{
             autoPlay,
             hasZoom,
+            hasChromecast,
             configuration: {
               ...DEFAULT_CONFIGURATION,
               ...configuration,

@@ -41,6 +41,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
   public static final String REACT_CLASS = "ReactNativeBitmovinPlayer";
 
+  private SourceConfig sourceConfig;
   private BitmovinPlayerCollector analyticsCollector;
   private PlayerView _playerView;
   private Player _player;
@@ -52,6 +53,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private boolean customSeek = false;
   private ReadableMap configuration = null;
   private final PlayerConfig playerConfig = new PlayerConfig();
+  private HashMap metaDataMap = new HashMap();
 
   @NotNull
   @Override
@@ -233,6 +235,22 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       }
     }
     @JavascriptInterface
+    public void chromecastAsync(String data) {
+      WritableMap map = Arguments.createMap();
+      map.putString("message", "chromecast");
+      map.putString("time", String.valueOf(_player.getCurrentTime()));
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
+      try {
+        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+          _playerView.getId(),
+          "onChromecast",
+          map);
+      } catch (Exception e) {
+        throw new ClassCastException(String.format("Cannot onChromecast error message: %s", e.getMessage()));
+      }
+    }
+    @JavascriptInterface
     public void forwardButtonAsync(String data) {
       WritableMap map = Arguments.createMap();
       map.putString("message", "forwardButton");
@@ -283,8 +301,8 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       String BITMOVIN_JS = appInfo.metaData.getString("BITMOVIN_PLAYER_JS");
       if (!BITMOVIN_CSS.equals("") && !BITMOVIN_JS.equals("")) {
         StyleConfig styleConfig = new StyleConfig();
-        styleConfig.setPlayerUiCss(BuildConfig.BITMOVIN_CSS);
-        styleConfig.setPlayerUiJs(BuildConfig.BITMOVIN_JS);
+        styleConfig.setPlayerUiCss(BITMOVIN_CSS);
+        styleConfig.setPlayerUiJs(BITMOVIN_JS);
         playerConfig.setStyleConfig(styleConfig);
 
       }
@@ -391,14 +409,13 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         heartbeat = Integer.valueOf(config.getString("hearbeat"));
       }
 
-      SourceConfig sourceConfigNew = new SourceConfig(
+      sourceConfig = new SourceConfig(
         Objects.requireNonNull(config.getString("url")),
         SourceType.Dash
       );
 
       if (config.getMap("advisory") != null) {
-        HashMap metaDataMap = new HashMap();
-        metaDataMap.put("hasNextEpisode",hasNextEpisode ? "true" : "false");
+        metaDataMap.put("hasNextEpisode", hasNextEpisode ? "true" : "false");
         try {
           advisory = Objects.requireNonNull(config.getMap("advisory")).toString();
           metaDataMap.put("advisory", new JSONObject(advisory).toString());
@@ -406,39 +423,47 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
           e.printStackTrace();
         }
 
-        sourceConfigNew.setMetadata(metaDataMap);
+        sourceConfig.setMetadata(metaDataMap);
       }
 
       if (config.getString("title") != null) {
-        sourceConfigNew.setTitle(Objects.requireNonNull(config.getString("title")));
+        sourceConfig.setTitle(Objects.requireNonNull(config.getString("title")));
       }
 
       if (config.getString("subtitle") != null) {
-        sourceConfigNew.setDescription(Objects.requireNonNull(config.getString("subtitle")));
+        sourceConfig.setDescription(Objects.requireNonNull(config.getString("subtitle")));
       }
 
       if (config.getString("thumbnails") != null) {
         ThumbnailTrack thumbnailTrack = new ThumbnailTrack(Objects.requireNonNull(config.getString("thumbnails")));
-        sourceConfigNew.setThumbnailTrack(thumbnailTrack);
+        sourceConfig.setThumbnailTrack(thumbnailTrack);
       }
 
       if (config.getString("poster") != null) {
-        sourceConfigNew.setPosterImage(Objects.requireNonNull(config.getString("poster")), false);
+        sourceConfig.setPosterImage(Objects.requireNonNull(config.getString("poster")), false);
       }
 
       if (config.getString("subtitles") != null) {
         SubtitleTrack subtitleTrack = new SubtitleTrack(config.getString("subtitles"), null, "en", "en", false, "en");
-        sourceConfigNew.addSubtitleTrack(subtitleTrack);
+        sourceConfig.addSubtitleTrack(subtitleTrack);
       }
 
       if (config.hasKey("startOffset")) {
-        sourceConfigNew.getOptions().setStartOffset(config.getDouble("startOffset"));
+        sourceConfig.getOptions().setStartOffset(config.getDouble("startOffset"));
       }
 
-      Source source = Source.create(sourceConfigNew);
+      Source source = Source.create(sourceConfig);
 
       _player.load(source);
 
+    }
+  }
+
+  @ReactProp(name = "hasChromecast")
+  public void setChromecast(PlayerView view, Boolean hasChromecast) {
+    metaDataMap.put("hasChromecast", hasChromecast ? "true" : "false");
+    if(sourceConfig != null) {
+      sourceConfig.setMetadata(metaDataMap);
     }
   }
 

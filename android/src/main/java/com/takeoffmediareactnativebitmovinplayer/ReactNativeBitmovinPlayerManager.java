@@ -444,7 +444,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       }
 
       if (config.getString("subtitles") != null) {
-        SubtitleTrack subtitleTrack = new SubtitleTrack(config.getString("subtitles"), null, "en", "en", false, "en");
+        SubtitleTrack subtitleTrack = new SubtitleTrack(config.getString("subtitles"), "text/vtt", "en", "en", false, "en");
         sourceConfig.addSubtitleTrack(subtitleTrack);
       }
 

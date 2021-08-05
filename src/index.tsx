@@ -114,7 +114,7 @@ export default React.forwardRef<
       if (maxHeight !== null && height && !loading) {
         setTimeout(() => {
           setMaxHeight(height);
-        }, 500);
+        }, 300);
       }
 
       if (height && maxHeight === height) {

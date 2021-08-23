@@ -71,6 +71,13 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         )
       )
       .put(
+        "onChromecast",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onChromecast")
+        )
+      )
+      .put(
         "onEvent",
         MapBuilder.of(
           "phasedRegistrationNames",

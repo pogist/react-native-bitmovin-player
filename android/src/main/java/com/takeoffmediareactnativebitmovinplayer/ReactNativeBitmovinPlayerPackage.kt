@@ -14,4 +14,5 @@ class ReactNativeBitmovinPlayerPackage : ReactPackage {
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>>{
     return listOf(ReactNativeBitmovinPlayerManager())
   }
+
 }

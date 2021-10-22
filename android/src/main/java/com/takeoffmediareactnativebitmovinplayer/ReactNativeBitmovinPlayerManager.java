@@ -1,7 +1,9 @@
 package com.takeoffmediareactnativebitmovinplayer;
 
+import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.webkit.JavascriptInterface;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -9,6 +11,8 @@ import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
 import com.bitmovin.player.PlayerView;
 import com.bitmovin.player.api.Player;
 import com.bitmovin.player.api.PlayerConfig;
+import com.bitmovin.player.api.drm.WidevineConfig;
+import com.bitmovin.player.api.event.EventListener;
 import com.bitmovin.player.api.event.PlayerEvent;
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
@@ -18,7 +22,7 @@ import com.bitmovin.player.api.source.SourceType;
 import com.bitmovin.player.api.ui.FullscreenHandler;
 import com.bitmovin.player.api.ui.StyleConfig;
 import com.bitmovin.player.ui.CustomMessageHandler;
-
+import com.bitmovin.player.ui.DefaultPictureInPictureHandler;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
@@ -46,6 +50,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private PlayerView _playerView;
   private Player _player;
   private boolean _fullscreen;
+  private boolean _PiP;
   private ThemedReactContext _reactContext;
   private Integer heartbeat = 30;
   private Double offset = 0.0;
@@ -54,6 +59,8 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private ReadableMap configuration = null;
   private final PlayerConfig playerConfig = new PlayerConfig();
   private HashMap metaDataMap = new HashMap();
+  private boolean playerShouldPause = true;
+  private boolean isPictureInPictureMode = false;
 
   @NotNull
   @Override
@@ -169,6 +176,27 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         )
       )
       .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPAvailabilityChanged")
+        )
+      )
+      .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPEnter")
+        )
+      )
+      .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPExit")
+        )
+      )
+      .put(
         "onSeek",
         MapBuilder.of(
           "phasedRegistrationNames",
@@ -265,6 +293,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
       _player.seek(_player.getCurrentTime() + 10);
+
       customSeek = true;
       try {
         _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -319,6 +348,10 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     _player = Player.create(context, playerConfig);
     _playerView = new PlayerView(context, _player);
     _playerView.setCustomMessageHandler(customMessageHandler);
+    // Create a PictureInPictureHandler and set it on the PlayerView
+     DefaultPictureInPictureHandler pictureInPictureHandler = new DefaultPictureInPictureHandler(context.getCurrentActivity(), _player);
+     _playerView.setPictureInPictureHandler(pictureInPictureHandler);
+
     _fullscreen = false;
     setListeners();
     nextCallback = false;
@@ -408,6 +441,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     String advisory;
     boolean hasNextEpisode;
 
+    String licenseUrl = "https://5e712504-drm-widevine-licensing.axprod.net/AcquireLicense";
+    WidevineConfig wvConfig = new WidevineConfig(licenseUrl);
+
     if (config != null && config.getString("url") != null) {
 
       hasNextEpisode = config.getBoolean("hasNextEpisode");
@@ -420,6 +456,8 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         Objects.requireNonNull(config.getString("url")),
         SourceType.Dash
       );
+      wvConfig.setHttpHeaders("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYTZkNzNjMDItNjI4OC00N2I4LWEyYjktYTZkMDAxMjg4OGFjIiwiYmVnaW5fZGF0ZSI6IjIwMjEtMTAtMTNUMTc6NTE6MTEuNDUwNDg5WiIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMjEtMTAtMTNUMTg6NTI6MTEuNDUwNDg5WiIsIm1lc3NhZ2UiOnsidHlwZSI6ImVudGl0bGVtZW50X21lc3NhZ2UiLCJ2ZXJzaW9uIjoyLCJsaWNlbnNlIjp7InN0YXJ0X2RhdGV0aW1lIjoiMjAyMS0wOC0wMlQwNTowMDowMFoiLCJleHBpcmF0aW9uX2RhdGV0aW1lIjoiMjAyMi0wOC0wMlQwNTowMDowMFoiLCJhbGxvd19wZXJzaXN0ZW5jZSI6dHJ1ZX0sImNvbnRlbnRfa2V5c19zb3VyY2UiOnsiaW5saW5lIjpbeyJpZCI6IjRDMUE2Qjk5ODc2RDQ5MUU4OTY1NzM4RDRGMTlBRjFEIiwiaXYiOiJ6UHFuMm1XcDJMQ3QrSWxrS0ovNTVnXHUwMDNkXHUwMDNkIiwiZW5jcnlwdGVkX2tleSI6IkxQZ2lNaG9uQ3hZQnAxWjZkcWVjTndcdTAwM2RcdTAwM2QifV19fX0.HlAZgnerJ4P3jwIRj9D8PMTeGhUsylVvZEeA2yAlAZ0");
+      sourceConfig.setDrmConfig(new WidevineConfig(licenseUrl));
 
       if (config.getMap("advisory") != null) {
         metaDataMap.put("hasNextEpisode", hasNextEpisode ? "true" : "false");
@@ -459,6 +497,26 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         sourceConfig.getOptions().setStartOffset(config.getDouble("startOffset"));
       }
 
+      if (config.getMap("drm") != null) {
+        String drmConf = Objects.requireNonNull(config.getMap("drm")).toString();
+        try {
+          JSONObject drmMapObj = new JSONObject(drmConf);
+          String drmNativeMap = drmMapObj.getJSONObject("NativeMap").toString();
+          JSONObject drm = new JSONObject(drmNativeMap);
+          if (drm.getString("isDrmEn") == "true") {
+            String licenseUrl = drm.getString("licenseUrl");
+            String drmHeader = drm.getString("header");
+            String drmToken = drm.getString("token");
+            drmWVConfigHeader.put(drmHeader, drmToken);
+            WidevineConfig widevineConfig = new WidevineConfig(licenseUrl);
+            widevineConfig.setHttpHeaders(drmWVConfigHeader);
+            sourceConfig.setDrmConfig(widevineConfig);
+          }
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
+      }
+
       Source source = Source.create(sourceConfig);
 
       _player.load(source);
@@ -475,7 +533,11 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   }
 
   @Override
-  public void onResume() {}
+  public void onResume() {
+    // Add the PictureInPictureEnterListener to the PlayerView
+    _playerView.onResume();
+
+  }
 
   @Override
   public void onPause() {}
@@ -592,6 +654,35 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         "onRenderFirstFrame",
         map);
     });
+    _playerView.on(PlayerEvent.PictureInPictureAvailabilityChanged.class, event ->{
+      WritableMap map = Arguments.createMap();
+      map.putString("PiP Avalability", "true");
+
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onPiPAvailabilityChanged",
+        map);
+    });
+    _playerView.on(PlayerEvent.PictureInPictureEnter.class, event ->{
+      WritableMap map = Arguments.createMap();
+      map.putString("enterPiP", "true");
+
+     _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+       _playerView.getId(),
+       "onPiPEnter",
+       map);
+   });
+
+  _playerView.on(PlayerEvent.PictureInPictureExit.class, event ->{
+    WritableMap map = Arguments.createMap();
+    map.putString("exitPiP", "true");
+
+    _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+      _playerView.getId(),
+      "onPiPExit",
+      map);
+  });
+
     _player.on(PlayerEvent.Error.class, event -> {
       WritableMap map = Arguments.createMap();
       WritableMap errorMap = Arguments.createMap();
@@ -606,7 +697,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     });
     _player.on(PlayerEvent.Muted.class, event -> {
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onMuted",
@@ -662,6 +752,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       }
     );
   }
+
 
   @Override
   public boolean isFullscreen() {

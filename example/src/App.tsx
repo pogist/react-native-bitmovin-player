@@ -60,6 +60,9 @@ export default function App() {
       onRewind={({ nativeEvent }) => {
         console.log({ nativeEvent });
       }}
+      onPiPEnter={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
     />
   );
 }

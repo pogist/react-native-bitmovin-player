@@ -22,7 +22,6 @@ import com.bitmovin.player.api.source.SourceType;
 import com.bitmovin.player.api.ui.FullscreenHandler;
 import com.bitmovin.player.api.ui.StyleConfig;
 import com.bitmovin.player.ui.CustomMessageHandler;
-import com.bitmovin.player.ui.DefaultPictureInPictureHandler;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
@@ -60,7 +59,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private final PlayerConfig playerConfig = new PlayerConfig();
   private HashMap metaDataMap = new HashMap();
   private boolean playerShouldPause = true;
-  private boolean isPictureInPictureMode = false;
 
   @NotNull
   @Override
@@ -348,10 +346,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     _player = Player.create(context, playerConfig);
     _playerView = new PlayerView(context, _player);
     _playerView.setCustomMessageHandler(customMessageHandler);
-    // Create a PictureInPictureHandler and set it on the PlayerView
-     DefaultPictureInPictureHandler pictureInPictureHandler = new DefaultPictureInPictureHandler(context.getCurrentActivity(), _player);
-     _playerView.setPictureInPictureHandler(pictureInPictureHandler);
-
     _fullscreen = false;
     setListeners();
     nextCallback = false;
@@ -441,9 +435,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     String advisory;
     boolean hasNextEpisode;
 
-    String licenseUrl = "https://5e712504-drm-widevine-licensing.axprod.net/AcquireLicense";
-    WidevineConfig wvConfig = new WidevineConfig(licenseUrl);
-
     if (config != null && config.getString("url") != null) {
 
       hasNextEpisode = config.getBoolean("hasNextEpisode");
@@ -456,8 +447,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         Objects.requireNonNull(config.getString("url")),
         SourceType.Dash
       );
-      wvConfig.setHttpHeaders("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYTZkNzNjMDItNjI4OC00N2I4LWEyYjktYTZkMDAxMjg4OGFjIiwiYmVnaW5fZGF0ZSI6IjIwMjEtMTAtMTNUMTc6NTE6MTEuNDUwNDg5WiIsImV4cGlyYXRpb25fZGF0ZSI6IjIwMjEtMTAtMTNUMTg6NTI6MTEuNDUwNDg5WiIsIm1lc3NhZ2UiOnsidHlwZSI6ImVudGl0bGVtZW50X21lc3NhZ2UiLCJ2ZXJzaW9uIjoyLCJsaWNlbnNlIjp7InN0YXJ0X2RhdGV0aW1lIjoiMjAyMS0wOC0wMlQwNTowMDowMFoiLCJleHBpcmF0aW9uX2RhdGV0aW1lIjoiMjAyMi0wOC0wMlQwNTowMDowMFoiLCJhbGxvd19wZXJzaXN0ZW5jZSI6dHJ1ZX0sImNvbnRlbnRfa2V5c19zb3VyY2UiOnsiaW5saW5lIjpbeyJpZCI6IjRDMUE2Qjk5ODc2RDQ5MUU4OTY1NzM4RDRGMTlBRjFEIiwiaXYiOiJ6UHFuMm1XcDJMQ3QrSWxrS0ovNTVnXHUwMDNkXHUwMDNkIiwiZW5jcnlwdGVkX2tleSI6IkxQZ2lNaG9uQ3hZQnAxWjZkcWVjTndcdTAwM2RcdTAwM2QifV19fX0.HlAZgnerJ4P3jwIRj9D8PMTeGhUsylVvZEeA2yAlAZ0");
-      sourceConfig.setDrmConfig(new WidevineConfig(licenseUrl));
 
       if (config.getMap("advisory") != null) {
         metaDataMap.put("hasNextEpisode", hasNextEpisode ? "true" : "false");
@@ -533,11 +522,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   }
 
   @Override
-  public void onResume() {
-    // Add the PictureInPictureEnterListener to the PlayerView
-    _playerView.onResume();
-
-  }
+  public void onResume() {}
 
   @Override
   public void onPause() {}
@@ -654,35 +639,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         "onRenderFirstFrame",
         map);
     });
-    _playerView.on(PlayerEvent.PictureInPictureAvailabilityChanged.class, event ->{
-      WritableMap map = Arguments.createMap();
-      map.putString("PiP Avalability", "true");
-
-      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-        _playerView.getId(),
-        "onPiPAvailabilityChanged",
-        map);
-    });
-    _playerView.on(PlayerEvent.PictureInPictureEnter.class, event ->{
-      WritableMap map = Arguments.createMap();
-      map.putString("enterPiP", "true");
-
-     _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-       _playerView.getId(),
-       "onPiPEnter",
-       map);
-   });
-
-  _playerView.on(PlayerEvent.PictureInPictureExit.class, event ->{
-    WritableMap map = Arguments.createMap();
-    map.putString("exitPiP", "true");
-
-    _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-      _playerView.getId(),
-      "onPiPExit",
-      map);
-  });
-
     _player.on(PlayerEvent.Error.class, event -> {
       WritableMap map = Arguments.createMap();
       WritableMap errorMap = Arguments.createMap();

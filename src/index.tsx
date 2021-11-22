@@ -24,8 +24,6 @@ export type ReactNativeBitmovinPlayerMethodsType = {
   destroy(): void;
   seekBackwardCommand(): void;
   seekForwardCommand(): void;
-  enterPiP(): void;
-  exitPiP(): void;
 };
 
 type ReactNativeBitmovinPlayerType = {
@@ -57,9 +55,6 @@ type ReactNativeBitmovinPlayerType = {
   onFullscreenExit?: (event: any) => void;
   onControlsShow?: (event: any) => void;
   onControlsHide?: (event: any) => void;
-  onPiPAvailabilityChanged?: (event: any) => void;
-  onPiPEnter?: (event: any) => void;
-  onPiPExit?: (event: any) => void;
   configuration: {
     url: string;
     poster?: string;
@@ -224,23 +219,6 @@ export default React.forwardRef<
       );
     };
 
-    const enterPiP = () => {
-      ReactNativeBitmovinPlayerModule.enterPiP(
-        findNodeHandle(playerRef.current || null)
-      );
-    };
-
-    const exitPiP = () => {
-      ReactNativeBitmovinPlayerModule.exitPiP(
-        findNodeHandle(playerRef.current || null)
-      );
-    };
-
-    const isPiPAvailable = () =>
-      ReactNativeBitmovinPlayerModule.isPiPAvailable(
-        findNodeHandle(playerRef.current || null)
-      );
-
     const getCurrentTime = () =>
       ReactNativeBitmovinPlayerModule.getCurrentTime(
         findNodeHandle(playerRef.current || null)
@@ -296,9 +274,6 @@ export default React.forwardRef<
       unmute,
       enterFullscreen,
       exitFullscreen,
-      enterPiP,
-      exitPiP,
-      isPiPAvailable,
       getCurrentTime,
       getDuration,
       getVolume,

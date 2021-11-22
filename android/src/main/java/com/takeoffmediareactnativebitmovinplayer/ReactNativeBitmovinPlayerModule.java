@@ -103,39 +103,6 @@ public class ReactNativeBitmovinPlayerModule extends ReactContextBaseJavaModule 
   }
 
   @ReactMethod
-  public  void enterPiP(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
-    if (playerView instanceof  PlayerView) {
-      ((PlayerView) playerView).enterPictureInPicture();
-    } else {
-      throw new ClassCastException(String.format("Cannot enterPictureInPicture: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
-    }
-  }
-
-  @ReactMethod
-  public  void exitPiP(int tag) {
-    View playerView = getCurrentActivity().findViewById(tag);
-    if (playerView instanceof  PlayerView) {
-      ((PlayerView) playerView).exitPictureInPicture();
-    } else {
-      throw new ClassCastException(String.format("Cannot enterPictureInPicture: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
-    }
-  }
-
-  @ReactMethod
-  public void isPiPAvailable(int tag, Promise promise) {
-    View playerView = getCurrentActivity().findViewById(tag);
-
-    if (playerView instanceof PlayerView) {
-      boolean pipAvailable = ((PlayerView) playerView).isPictureInPictureAvailable();
-
-      promise.resolve(pipAvailable);
-    } else {
-      throw new ClassCastException(String.format("Cannot get isPiPAvailable: view with tag #%d is not a ReactNativeBitmovinPlayer", tag));
-    }
-  }
-
-  @ReactMethod
   public void getCurrentTime(int tag, Promise promise) {
     View playerView = getCurrentActivity().findViewById(tag);
 

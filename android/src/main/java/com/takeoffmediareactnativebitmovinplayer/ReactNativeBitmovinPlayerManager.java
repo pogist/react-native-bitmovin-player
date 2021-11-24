@@ -1,8 +1,21 @@
 package com.takeoffmediareactnativebitmovinplayer;
 
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
+import android.os.Build;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.RequiresApi;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
 import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
@@ -16,9 +29,11 @@ import com.bitmovin.player.api.source.Source;
 import com.bitmovin.player.api.source.SourceConfig;
 import com.bitmovin.player.api.source.SourceType;
 import com.bitmovin.player.api.ui.FullscreenHandler;
+import com.bitmovin.player.api.ui.PictureInPictureHandler;
 import com.bitmovin.player.api.ui.StyleConfig;
 import com.bitmovin.player.ui.CustomMessageHandler;
 
+import com.bitmovin.player.ui.DefaultPictureInPictureHandler;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
@@ -29,6 +44,7 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +53,8 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerView> implements FullscreenHandler, LifecycleEventListener {
+@RequiresApi(api = Build.VERSION_CODES.O)
+public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerView> implements LifecycleEventListener, FullscreenHandler, PictureInPictureHandler {
 
   public static final String REACT_CLASS = "ReactNativeBitmovinPlayer";
 
@@ -54,6 +71,17 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private ReadableMap configuration = null;
   private final PlayerConfig playerConfig = new PlayerConfig();
   private HashMap metaDataMap = new HashMap();
+  private BroadcastReceiver mReceiver;
+  private final PictureInPictureParams.Builder mPictureInPictureParamsBuilder =
+    new PictureInPictureParams.Builder();
+  private static final String ACTION_MEDIA_CONTROL = "media_control";
+  private static final String EXTRA_CONTROL_TYPE = "control_type";
+  private static final int REQUEST_PLAY = 1;
+  private static final int REQUEST_PAUSE = 2;
+  private static final int REQUEST_INFO = 3;
+  private static final int CONTROL_TYPE_PLAY = 1;
+  private static final int CONTROL_TYPE_PAUSE = 2;
+
 
   @NotNull
   @Override
@@ -321,10 +349,59 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     _player = Player.create(context, playerConfig);
     _playerView = new PlayerView(context, _player);
     _playerView.setCustomMessageHandler(customMessageHandler);
+    DefaultPictureInPictureHandler pictureInPictureHandler = new DefaultPictureInPictureHandler(_reactContext.getCurrentActivity(), _player);
+    _playerView.setPictureInPictureHandler(pictureInPictureHandler);
     _fullscreen = false;
     setListeners();
+    setReceiver();
     nextCallback = false;
     return _playerView;
+  }
+
+  private void setReceiver () {
+    mReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        if (intent == null
+          || !ACTION_MEDIA_CONTROL.equals(intent.getAction())) {
+          return;
+        }
+        final int controlType = intent.getIntExtra(EXTRA_CONTROL_TYPE, 0);
+
+        switch (controlType) {
+          case CONTROL_TYPE_PLAY:
+            _player.play();
+            updatePictureInPictureActions(
+              R.drawable.ic_pause_24dp, _reactContext.getString(R.string.pause), CONTROL_TYPE_PAUSE, REQUEST_PAUSE);
+            break;
+          case CONTROL_TYPE_PAUSE:
+            _player.pause();
+            updatePictureInPictureActions(
+              R.drawable.ic_play_arrow_24dp, _reactContext.getString(R.string.play), CONTROL_TYPE_PLAY, REQUEST_PLAY);
+            break;
+        }
+      }
+    };
+    _reactContext.registerReceiver(mReceiver, new IntentFilter(ACTION_MEDIA_CONTROL));
+  }
+
+  void updatePictureInPictureActions(
+    @DrawableRes int iconId, String title, int controlType, int requestCode) {
+    final ArrayList<RemoteAction> actions = new ArrayList<>();
+
+    final PendingIntent intent =
+      PendingIntent.getBroadcast(
+        _reactContext.getCurrentActivity(),
+        requestCode,
+        new Intent(ACTION_MEDIA_CONTROL).putExtra(EXTRA_CONTROL_TYPE, controlType),
+        0);
+
+    final Icon icon;
+    icon = Icon.createWithResource(_reactContext, iconId);
+    actions.add(new RemoteAction(icon, title, title, intent));
+    mPictureInPictureParamsBuilder.setActions(actions);
+    Activity mActivity = _reactContext.getCurrentActivity();
+    mActivity.setPictureInPictureParams(mPictureInPictureParamsBuilder.build());
   }
 
   @Override
@@ -476,6 +553,14 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
     }
   }
 
+  @ReactProp(name = "inPiPMode")
+  public void setPiPMode(PlayerView view, Boolean inPiPMode) {
+    metaDataMap.put("inPiPMode",inPiPMode ? "true" : "false");
+    if(sourceConfig != null) {
+      sourceConfig.setMetadata(metaDataMap);
+    }
+  }
+
   @Override
   public void onResume() {}
 
@@ -512,174 +597,176 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
   private void setListeners() {
     _player.on(PlayerEvent.Ready.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        map.putString("message", "load");
-        map.putString("volume", String.valueOf(_player.getVolume()));
-        map.putString("duration", String.valueOf(_player.getDuration()));
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onReady",
-          map);
-      }
+      WritableMap map = Arguments.createMap();
+      map.putString("message", "load");
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onReady",
+        map);
     });
     _player.on(PlayerEvent.Play.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        map.putString("message", "play");
-        map.putDouble("time", event.getTime());
-        map.putString("volume", String.valueOf(_player.getVolume()));
-        map.putString("duration", String.valueOf(_player.getDuration()));
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onPlay",
-          map);
-      }
+      WritableMap map = Arguments.createMap();
+      map.putString("message", "play");
+      map.putDouble("time", event.getTime());
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onPlay",
+        map);
+      updatePictureInPictureActions(
+        R.drawable.ic_pause_24dp, _reactContext.getString(R.string.pause), CONTROL_TYPE_PAUSE, REQUEST_PAUSE);
     });
     _player.on(PlayerEvent.Paused.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        map.putString("message", "pause");
-        map.putDouble("time", event.getTime());
-        map.putString("volume", String.valueOf(_player.getVolume()));
-        map.putString("duration", String.valueOf(_player.getDuration()));
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onPause",
-          map);
-      }
+      WritableMap map = Arguments.createMap();
+      map.putString("message", "pause");
+      map.putDouble("time", event.getTime());
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onPause",
+        map);
+      updatePictureInPictureActions(
+        R.drawable.ic_play_arrow_24dp, _reactContext.getString(R.string.play), CONTROL_TYPE_PLAY, REQUEST_PLAY);
     });
     _player.on(PlayerEvent.TimeChanged.class, event -> {
-      if(_player.getSource()){
-        // next
-        if (configuration != null && configuration.hasKey("nextPlayback") && event.getTime() != 0.0) {
-          if (event.getTime() <= _player.getDuration() - (configuration.getDouble("nextPlayback")) && nextCallback) {
-            nextCallback = false;
-          }
-          if (event.getTime() > _player.getDuration() - (configuration.getDouble("nextPlayback")) && !nextCallback) {
-            nextCallback = true;
-            WritableMap map = Arguments.createMap();
-            map.putString("message", "next");
-            _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-              _playerView.getId(),
-              "onEvent",
-              map);
-          }
+      if (configuration != null && configuration.hasKey("nextPlayback") && event.getTime() != 0.0) {
+        if (event.getTime() <= _player.getDuration() - (configuration.getDouble("nextPlayback")) && nextCallback) {
+          nextCallback = false;
         }
-        // save
-        if((event.getTime() > (offset + heartbeat) || event.getTime() < (offset - heartbeat)) && event.getTime() < (_player.getDuration())) {
-          offset = event.getTime();
+        if (event.getTime() > _player.getDuration() - (configuration.getDouble("nextPlayback")) && !nextCallback) {
+          nextCallback = true;
           WritableMap map = Arguments.createMap();
-          map.putString("message", "save");
-          map.putString("time", String.valueOf(_player.getCurrentTime()));
-          map.putString("volume", String.valueOf(_player.getVolume()));
-          map.putString("duration", String.valueOf(_player.getDuration()));
+          map.putString("message", "next");
           _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
             _playerView.getId(),
             "onEvent",
             map);
         }
       }
-    });
-    _player.on(PlayerEvent.PlaybackFinished.class, event -> {
-      if(_player.getSource()){
+      // save
+      if((event.getTime() > (offset + heartbeat) || event.getTime() < (offset - heartbeat)) && event.getTime() < (_player.getDuration())) {
+        offset = event.getTime();
         WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onPlaybackFinished",
-          map);
-      }
-    });
-    _player.on(PlayerEvent.RenderFirstFrame.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onRenderFirstFrame",
-          map);
-      }
-    });
-    _player.on(PlayerEvent.Error.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        WritableMap errorMap = Arguments.createMap();
-        errorMap.putInt("code", Integer.parseInt(String.valueOf(event.getCode())));
-        errorMap.putString("message", event.getMessage());
-        map.putMap("error", errorMap);
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onError",
-          map);
-      }
-    });
-    _player.on(PlayerEvent.Muted.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onMuted",
-          map);
-      }
-    });
-    _player.on(PlayerEvent.Unmuted.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onUnmuted",
-          map);
-      }
-    });
-    _player.on(PlayerEvent.Seek.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        map.putString("message", "seek");
+        map.putString("message", "save");
         map.putString("time", String.valueOf(_player.getCurrentTime()));
-        map.putDouble("position", event.getTimestamp());
         map.putString("volume", String.valueOf(_player.getVolume()));
         map.putString("duration", String.valueOf(_player.getDuration()));
-        if (customSeek) {
-          customSeek = false;
-        } else {
-          _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-            _playerView.getId(),
-            "onSeek",
-            map);
-        }
+        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+          _playerView.getId(),
+          "onEvent",
+          map);
+      }
+    });
+    _player.on(PlayerEvent.PlaybackFinished.class, event -> {
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onPlaybackFinished",
+        map);
+    });
+    _player.on(PlayerEvent.RenderFirstFrame.class, event -> {
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onRenderFirstFrame",
+        map);
+    });
+    _player.on(PlayerEvent.Error.class, event -> {
+      WritableMap map = Arguments.createMap();
+      WritableMap errorMap = Arguments.createMap();
+      errorMap.putInt("code", Integer.parseInt(String.valueOf(event.getCode())));
+      errorMap.putString("message", event.getMessage());
+      map.putMap("error", errorMap);
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onError",
+        map);
+    });
+    _player.on(PlayerEvent.Muted.class, event -> {
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onMuted",
+        map);
+    });
+    _player.on(PlayerEvent.Unmuted.class, event -> {
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onUnmuted",
+        map);
+    });
+    _player.on(PlayerEvent.Seek.class, event -> {
+      WritableMap map = Arguments.createMap();
+      map.putString("message", "seek");
+      map.putString("time", String.valueOf(_player.getCurrentTime()));
+      map.putDouble("position", event.getTimestamp());
+      map.putString("volume", String.valueOf(_player.getVolume()));
+      map.putString("duration", String.valueOf(_player.getDuration()));
+      if (customSeek) {
+        customSeek = false;
+      } else {
+        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+          _playerView.getId(),
+          "onSeek",
+          map);
       }
     });
     _player.on(PlayerEvent.Seeked.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onSeeked",
-          map);
-      }
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onSeeked",
+        map);
     });
     _player.on(PlayerEvent.FullscreenEnter.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onFullscreenEnter",
-          map);
-      }
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onFullscreenEnter",
+        map);
     });
     _player.on(PlayerEvent.FullscreenExit.class, event -> {
-      if(_player.getSource()){
-        WritableMap map = Arguments.createMap();
-        _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-          _playerView.getId(),
-          "onFullscreenExit",
-          map);
-        }
-      }
-    );
+      WritableMap map = Arguments.createMap();
+      _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+        _playerView.getId(),
+        "onFullscreenExit",
+        map);
+      });
+    _player.on(PlayerEvent.PictureInPictureExit.class, event -> {
+        Log.d("PlayerOn", "Exit Pip");
+      });
+    _player.on(PlayerEvent.PictureInPictureEnter.class, event -> {
+      Log.d("PlayerOn", "Enter Pip");
+    });
   }
 
   @Override
   public boolean isFullscreen() {
     return _fullscreen;
+  }
+
+  @Override
+  public boolean isPictureInPictureAvailable() {
+    return true;
+  }
+
+  @Override
+  public boolean isPictureInPicture() {
+    return true;
+  }
+
+  @Override
+  public void enterPictureInPicture() {
+    Log.d("pipEvent", "enterPictureInPicture: ");
+  }
+
+  @Override
+  public void exitPictureInPicture() {
+    Log.d("pipEvent", "exitPictureInPicture: ");
   }
 }

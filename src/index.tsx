@@ -22,6 +22,8 @@ export type ReactNativeBitmovinPlayerMethodsType = {
   play(): void;
   pause(): void;
   destroy(): void;
+  enterPiP(): void;
+  exitPiP(): void;
   seekBackwardCommand(): void;
   seekForwardCommand(): void;
 };
@@ -29,6 +31,7 @@ export type ReactNativeBitmovinPlayerMethodsType = {
 type ReactNativeBitmovinPlayerType = {
   autoPlay: boolean;
   hasZoom: boolean;
+  inPiPMode?: boolean;
   hasChromecast?: boolean;
   style?: any;
   color?: string;
@@ -97,6 +100,7 @@ export default React.forwardRef<
       onReady,
       hasZoom,
       hasChromecast,
+      inPiPMode,
       autoPlay,
       style,
       ...props
@@ -255,6 +259,16 @@ export default React.forwardRef<
         findNodeHandle(playerRef.current || null)
       );
 
+      const enterPiP = () =>
+      ReactNativeBitmovinPlayerModule.enterPiP(
+        findNodeHandle(playerRef.current || null)
+      );
+
+    const exitPiP = () =>
+      ReactNativeBitmovinPlayerModule.exitPiP(
+        findNodeHandle(playerRef.current || null)
+      );
+
     useImperativeHandle(ref, () => ({
       play,
       pause,
@@ -276,6 +290,8 @@ export default React.forwardRef<
       isPaused,
       isStalled,
       isPlaying,
+      enterPiP,
+      exitPiP,
     }));
 
     const _onReady = (event: any) => {
@@ -311,6 +327,7 @@ export default React.forwardRef<
             autoPlay,
             hasZoom,
             hasChromecast,
+            inPiPMode,
             configuration: {
               ...DEFAULT_CONFIGURATION,
               ...configuration,

@@ -1,6 +1,11 @@
 import * as React from 'react';
-
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import ReactNativeBitmovinPlayer, {
   ReactNativeBitmovinPlayerMethodsType,
 } from '@takeoffmedia/react-native-bitmovin-player';
@@ -13,6 +18,24 @@ const videoUrl = Platform.select({
 
 export default function App() {
   const playerRef = React.useRef<ReactNativeBitmovinPlayerMethodsType>();
+  const [isInPipMode, setIsInPipMode] = useState(false);
+
+  useEffect(() => {
+    const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+    eventEmitter.addListener('onPictureInPictureModeChanged', (event) => {
+      if (event.PiP_event === 'EnterPiP') {
+        setIsInPipMode(true);
+        console.log('EnterPiP');
+      } else if (event.PiP_event === 'ExitPiP') {
+        setIsInPipMode(false);
+        console.log('ExitPiP');
+      }
+    });
+
+    return () => {
+      eventEmitter.removeAllListeners('onPictureInPictureModeChanged');
+    }
+  }, []);
 
   return (
     <ReactNativeBitmovinPlayer
@@ -20,6 +43,7 @@ export default function App() {
       style={styles.container}
       autoPlay
       hasZoom={false}
+      inPiPMode={isInPipMode}
       configuration={{
         title: 'It works',
         subtitle: 'S1 · E1',

@@ -170,6 +170,7 @@ final class ViewController: UIView {
     @objc var onSeek:RCTDirectEventBlock? = nil
     @objc var onForward:RCTDirectEventBlock? = nil
     @objc var onRewind:RCTDirectEventBlock? = nil
+    @objc var onPipMode:RCTDirectEventBlock? = nil
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -345,6 +346,10 @@ extension ViewController: UserInterfaceListener {
     func onPictureInPictureEnter(_ event: PictureInPictureEnterEvent) {
         print("onPictureInPictureEnter")
         isInPipMode = true;
+        let onPipModeCallback = self.onPipMode;
+        if((onPipModeCallback) != nil) {
+            onPipModeCallback!(["value": isInPipMode])
+        }
         pipModeButton(isInPipMode);
     }
     
@@ -355,6 +360,10 @@ extension ViewController: UserInterfaceListener {
     func onPictureInPictureExit(_ event: PictureInPictureExitEvent) {
         print("onPictureInPictureExit")
         isInPipMode = false;
+        let onPipModeCallback = self.onPipMode;
+        if((onPipModeCallback) != nil) {
+            onPipModeCallback!(["value": isInPipMode])
+        }
         pipModeButton(isInPipMode);
     }
     

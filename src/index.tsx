@@ -58,6 +58,7 @@ type ReactNativeBitmovinPlayerType = {
   onFullscreenExit?: (event: any) => void;
   onControlsShow?: (event: any) => void;
   onControlsHide?: (event: any) => void;
+  onPipMode?: (event: any) => void;
   configuration: {
     url: string;
     poster?: string;

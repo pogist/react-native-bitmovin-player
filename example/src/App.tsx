@@ -86,6 +86,9 @@ export default function App() {
       onRewind={({ nativeEvent }) => {
         console.log({ nativeEvent });
       }}
+      onPipMode={({ nativeEvent }) => {
+        console.log({ nativeEvent });
+      }}
     />
   );
 }

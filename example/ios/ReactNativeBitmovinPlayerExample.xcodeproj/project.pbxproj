@@ -51,6 +51,7 @@
 		192964FF89A8B51FFF115BB4 /* libPods-ReactNativeBitmovinPlayerExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactNativeBitmovinPlayerExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E47B1E0B4A5D006451C7 /* ReactNativeBitmovinPlayerExample-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ReactNativeBitmovinPlayerExample-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* ReactNativeBitmovinPlayerExample-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ReactNativeBitmovinPlayerExample-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5D49807F274D17E600F10AE0 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		5D98A4352590D65B00C94A99 /* ReactNativeBitmovinPlayerExample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ReactNativeBitmovinPlayerExample-Bridging-Header.h"; sourceTree = "<group>"; };
 		5D98A4362590D65B00C94A99 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = ReactNativeBitmovinPlayerExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -122,6 +123,7 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				5D98A4362590D65B00C94A99 /* File.swift */,
 				5D98A4352590D65B00C94A99 /* ReactNativeBitmovinPlayerExample-Bridging-Header.h */,
+				5D49807F274D17E600F10AE0 /* Config.xcconfig */,
 			);
 			name = ReactNativeBitmovinPlayerExample;
 			sourceTree = "<group>";
@@ -211,6 +213,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				52774F857922307808C5C2D3 /* [CP] Embed Pods Frameworks */,
 				A1105CEBB8D3648BE7247B70 /* [CP] Copy Pods Resources */,
+				5D498080274D18EA00F10AE0 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -387,6 +390,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ReactNativeBitmovinPlayerExample/Pods-ReactNativeBitmovinPlayerExample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		5D498080274D18EA00F10AE0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nrm \"${BUILD_DIR}/${INFOPLIST_PATH}\"\n\"${SRCROOT}/../node_modules/react-native-config/ios/ReactNativeConfig/BuildXCConfig.rb\" \"${SRCROOT}/..\" \"${SRCROOT}/tmp.xcconfig\"\n";
 		};
 		A1105CEBB8D3648BE7247B70 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -586,6 +606,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "ReactNativeBitmovinPlayerExample-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -609,6 +630,7 @@
 				PRODUCT_NAME = ReactNativeBitmovinPlayerExample;
 				SWIFT_OBJC_BRIDGING_HEADER = "ReactNativeBitmovinPlayerExample-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -729,6 +751,7 @@
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5D49807F274D17E600F10AE0 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
@@ -789,6 +812,7 @@
 		};
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5D49807F274D17E600F10AE0 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;

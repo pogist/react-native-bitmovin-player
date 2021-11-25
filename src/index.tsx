@@ -259,15 +259,25 @@ export default React.forwardRef<
         findNodeHandle(playerRef.current || null)
       );
 
-      const enterPiP = () =>
-      ReactNativeBitmovinPlayerModule.enterPiP(
-        findNodeHandle(playerRef.current || null)
-      );
+    const enterPiP = () => {
+      if (Platform.OS === 'android') {
+        ReactNativeBitmovinPlayerModule.enterPiP(
+          findNodeHandle(playerRef.current || null)
+        );
+      } else {
+        ReactNativeBitmovinPlayerModule.enterPiP();
+      }
+    };
 
-    const exitPiP = () =>
-      ReactNativeBitmovinPlayerModule.exitPiP(
-        findNodeHandle(playerRef.current || null)
-      );
+    const exitPiP = () => {
+      if (Platform.OS === 'android') {
+        ReactNativeBitmovinPlayerModule.exitPiP(
+          findNodeHandle(playerRef.current || null)
+        );
+      } else {
+        ReactNativeBitmovinPlayerModule.exitPiP();
+      }
+    };
 
     useImperativeHandle(ref, () => ({
       play,

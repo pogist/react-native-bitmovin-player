@@ -21,27 +21,29 @@ export default function App() {
   const [isInPipMode, setIsInPipMode] = useState(false);
 
   useEffect(() => {
-    const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
-    eventEmitter.addListener('onPictureInPictureModeChanged', (event) => {
-      if (event.PiP_event === 'EnterPiP') {
-        setIsInPipMode(true);
-        console.log('EnterPiP');
-      } else if (event.PiP_event === 'ExitPiP') {
-        setIsInPipMode(false);
-        console.log('ExitPiP');
-      }
-    });
-
-    return () => {
-      eventEmitter.removeAllListeners('onPictureInPictureModeChanged');
+    if (Platform.OS === 'android') {
+      const eventEmitter = new NativeEventEmitter(NativeModules.ToastExample);
+      eventEmitter.addListener('onPictureInPictureModeChanged', (event) => {
+        if (event.PiP_event === 'EnterPiP') {
+          setIsInPipMode(true);
+          console.log('EnterPiP');
+        } else if (event.PiP_event === 'ExitPiP') {
+          setIsInPipMode(false);
+          console.log('ExitPiP');
+        }
+      });
+      return () => {
+        eventEmitter.removeAllListeners('onPictureInPictureModeChanged');
+      };
     }
+    return () => {};
   }, []);
 
   return (
     <ReactNativeBitmovinPlayer
       ref={playerRef as any}
       style={styles.container}
-      autoPlay
+      autoPlay={false}
       hasZoom={false}
       inPiPMode={isInPipMode}
       configuration={{

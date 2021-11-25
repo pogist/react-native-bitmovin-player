@@ -43,4 +43,16 @@ class ReactNativeBitmovinPlayer: RCTViewManager {
     func seekForwardCommand() -> Void {
         playerView?.seekForwardCommand()
     }
+    
+    @objc(enterPiP)
+    func enterPiP() -> Void {
+        playerView?.enterPiP()
+    }
+    
+    @objc(exitPiP)
+    func exitPiP() -> Void {
+        playerView?.exitPiP()
+    }
+    
+
 }

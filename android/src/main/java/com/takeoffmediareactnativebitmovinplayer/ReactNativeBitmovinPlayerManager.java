@@ -22,6 +22,7 @@ import com.bitmovin.player.api.source.SourceType;
 import com.bitmovin.player.api.ui.FullscreenHandler;
 import com.bitmovin.player.api.ui.StyleConfig;
 import com.bitmovin.player.ui.CustomMessageHandler;
+import com.bitmovin.player.api.event.EventListener;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableMap;
@@ -234,7 +235,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       map.putString("time", String.valueOf(_player.getCurrentTime()));
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
-      _player.destroy();
       if (analyticsCollector != null) {
         analyticsCollector.detachPlayer();
       }
@@ -246,6 +246,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       } catch (Exception e) {
         throw new ClassCastException(String.format("Cannot onEvent closePlater error message: %s", e.getMessage()));
       }
+      removeListeners();
+      _player.unload();
+      _player.destroy();
     }
     @JavascriptInterface
     public void nextEpisodeAsync(String data) {
@@ -254,7 +257,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       map.putString("time", String.valueOf(_player.getCurrentTime()));
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
-      _player.destroy();
       if (analyticsCollector != null) {
         analyticsCollector.detachPlayer();
       }
@@ -266,6 +268,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       } catch (Exception e) {
         throw new ClassCastException(String.format("Cannot onEvent nextEpisode error message: %s", e.getMessage()));
       }
+      removeListeners();
+      _player.unload();
+      _player.destroy();
     }
     @JavascriptInterface
     public void chromecastAsync(String data) {
@@ -354,10 +359,9 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
   @Override
   public void onDropViewInstance(@NotNull PlayerView view) {
+    removeListeners();
     _playerView.onDestroy();
-
     super.onDropViewInstance(view);
-
     _player = null;
     _playerView = null;
   }
@@ -439,8 +443,8 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
       hasNextEpisode = config.getBoolean("hasNextEpisode");
 
-      if (config.getString("heartbeat") != null) {
-        heartbeat = Integer.valueOf(config.getString("hearbeat"));
+      if (config.hasKey("hearbeat")) {
+        heartbeat = (int)config.getDouble("hearbeat");
       }
 
       sourceConfig = new SourceConfig(
@@ -523,40 +527,69 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
   @Override
   public void onResume() {}
-
   @Override
   public void onPause() {}
-
   @Override
   public void onDestroy() {}
-
   @Override
   public void onFullscreenRequested() {
     _fullscreen = true;
   }
-
   @Override
   public void onFullscreenExitRequested() {
     _fullscreen = false;
   }
-
   @Override
   public void onHostResume() {
     _playerView.onResume();
   }
-
   @Override
   public void onHostPause() {
     _playerView.onPause();
   }
-
   @Override
   public void onHostDestroy() {
     _playerView.onDestroy();
   }
+  @Override
+  public boolean isFullscreen() {
+    return _fullscreen;
+  }
 
   private void setListeners() {
-    _player.on(PlayerEvent.Ready.class, event -> {
+    _player.on(PlayerEvent.Ready.class, onReadyListener);
+    _player.on(PlayerEvent.Play.class, onPlayListener);
+    _player.on(PlayerEvent.Paused.class, onPausedListener);
+    _player.on(PlayerEvent.TimeChanged.class, onTimeChangedListener);
+    _player.on(PlayerEvent.PlaybackFinished.class, onPlaybackFinishedistener);
+    _player.on(PlayerEvent.RenderFirstFrame.class, onRenderFirstFrameListener);
+    _player.on(PlayerEvent.Error.class, onErrorListener);
+    _player.on(PlayerEvent.Muted.class, onMutedListener);
+    _player.on(PlayerEvent.Unmuted.class, onUnmutedListener);
+    _player.on(PlayerEvent.Seek.class, onSeekListener);
+    _player.on(PlayerEvent.Seeked.class, onSeekedListener);
+    _player.on(PlayerEvent.FullscreenEnter.class, onFullscreenEnterListener);
+    _player.on(PlayerEvent.FullscreenExit.class, onFullscreenExitListener);
+  }
+
+  private void removeListeners() {
+    _player.off(onReadyListener);
+    _player.off(onPlayListener);
+    _player.off(onPausedListener);
+    _player.off(onTimeChangedListener);
+    _player.off(onPlaybackFinishedistener);
+    _player.off(onRenderFirstFrameListener);
+    _player.off(onErrorListener);
+    _player.off(onMutedListener);
+    _player.off(onUnmutedListener);
+    _player.off(onSeekListener);
+    _player.off(onSeekedListener);
+    _player.off(onFullscreenEnterListener);
+    _player.off(onFullscreenExitListener);
+  }
+
+  private final EventListener<PlayerEvent.Ready> onReadyListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       map.putString("message", "load");
       map.putString("volume", String.valueOf(_player.getVolume()));
@@ -565,40 +598,43 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         _playerView.getId(),
         "onReady",
         map);
-    });
-    _player.on(PlayerEvent.Play.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Play> onPlayListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       map.putString("message", "play");
       map.putDouble("time", event.getTime());
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onPlay",
         map);
-    });
-    _player.on(PlayerEvent.Paused.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Paused> onPausedListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       map.putString("message", "pause");
       map.putDouble("time", event.getTime());
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onPause",
         map);
-    });
-    _player.on(PlayerEvent.TimeChanged.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.TimeChanged> onTimeChangedListener = event -> {
+    if(_player != null && _player.getSource() != null){
       // next
-      if (configuration != null && configuration.hasKey("nextPlayback")) {
+      if (configuration != null && configuration.hasKey("nextPlayback") && event.getTime() != 0.0) {
         if (event.getTime() <= _player.getDuration() - (configuration.getDouble("nextPlayback")) && nextCallback) {
           nextCallback = false;
         }
         if (event.getTime() > _player.getDuration() - (configuration.getDouble("nextPlayback")) && !nextCallback) {
           nextCallback = true;
-
           WritableMap map = Arguments.createMap();
           map.putString("message", "next");
           _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -607,7 +643,6 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
             map);
         }
       }
-
       // save
       if((event.getTime() > (offset + heartbeat) || event.getTime() < (offset - heartbeat)) && event.getTime() < (_player.getDuration())) {
         offset = event.getTime();
@@ -621,52 +656,59 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
           "onEvent",
           map);
       }
-
-    });
-    _player.on(PlayerEvent.PlaybackFinished.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.PlaybackFinished> onPlaybackFinishedistener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onPlaybackFinished",
         map);
-    });
-    _player.on(PlayerEvent.RenderFirstFrame.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.RenderFirstFrame> onRenderFirstFrameListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onRenderFirstFrame",
         map);
-    });
-    _player.on(PlayerEvent.Error.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Error> onErrorListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       WritableMap errorMap = Arguments.createMap();
       errorMap.putInt("code", Integer.parseInt(String.valueOf(event.getCode())));
       errorMap.putString("message", event.getMessage());
       map.putMap("error", errorMap);
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onError",
         map);
-    });
-    _player.on(PlayerEvent.Muted.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Muted> onMutedListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onMuted",
         map);
-    });
-    _player.on(PlayerEvent.Unmuted.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Unmuted> onUnmutedListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onUnmuted",
         map);
-    });
-    _player.on(PlayerEvent.Seek.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Seek> onSeekListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
       map.putString("message", "seek");
       map.putString("time", String.valueOf(_player.getCurrentTime()));
@@ -681,37 +723,33 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
           "onSeek",
           map);
       }
-    });
-    _player.on(PlayerEvent.Seeked.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.Seeked> onSeekedListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onSeeked",
         map);
-    });
-    _player.on(PlayerEvent.FullscreenEnter.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.FullscreenEnter> onFullscreenEnterListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onFullscreenEnter",
         map);
-    });
-    _player.on(PlayerEvent.FullscreenExit.class, event -> {
+    }
+  };
+  private final EventListener<PlayerEvent.FullscreenExit> onFullscreenExitListener = event -> {
+    if(_player != null && _player.getSource() != null){
       WritableMap map = Arguments.createMap();
-
       _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
         _playerView.getId(),
         "onFullscreenExit",
         map);
-      }
-    );
-  }
-
-
-  @Override
-  public boolean isFullscreen() {
-    return _fullscreen;
-  }
+    }
+  };
 }

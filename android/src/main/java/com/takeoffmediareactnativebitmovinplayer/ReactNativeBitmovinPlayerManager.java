@@ -1,9 +1,7 @@
 package com.takeoffmediareactnativebitmovinplayer;
 
-import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.webkit.JavascriptInterface;
 
 import com.bitmovin.analytics.BitmovinAnalyticsConfig;
@@ -12,7 +10,6 @@ import com.bitmovin.player.PlayerView;
 import com.bitmovin.player.api.Player;
 import com.bitmovin.player.api.PlayerConfig;
 import com.bitmovin.player.api.drm.WidevineConfig;
-import com.bitmovin.player.api.event.EventListener;
 import com.bitmovin.player.api.event.PlayerEvent;
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
@@ -58,7 +55,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private boolean customSeek = false;
   private ReadableMap configuration = null;
   private final PlayerConfig playerConfig = new PlayerConfig();
-  private HashMap metaDataMap = new HashMap();
+  private HashMap<String, String> metaDataMap = new HashMap<String, String>();
   private boolean playerShouldPause = true;
 
   @NotNull
@@ -496,10 +493,11 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
           JSONObject drmMapObj = new JSONObject(drmConf);
           String drmNativeMap = drmMapObj.getJSONObject("NativeMap").toString();
           JSONObject drm = new JSONObject(drmNativeMap);
-          if (drm.getString("isDrmEn") == "true") {
+          if (drm.getString("isDrmEn").equals("true")) {
             String licenseUrl = drm.getString("licenseUrl");
             String drmHeader = drm.getString("header");
             String drmToken = drm.getString("token");
+            HashMap<String, String> drmWVConfigHeader = new HashMap<>();
             drmWVConfigHeader.put(drmHeader, drmToken);
             WidevineConfig widevineConfig = new WidevineConfig(licenseUrl);
             widevineConfig.setHttpHeaders(drmWVConfigHeader);

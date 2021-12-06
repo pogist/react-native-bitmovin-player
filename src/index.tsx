@@ -75,6 +75,7 @@ type ReactNativeBitmovinPlayerType = {
       licenseUrl: string;
       header: string;
       token: string;
+      certificateUrl: string;
     };
   };
   analytics?: {

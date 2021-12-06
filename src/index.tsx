@@ -70,6 +70,13 @@ type ReactNativeBitmovinPlayerType = {
       classification: string;
       description: string;
     };
+    drm?: {
+      isDrmEn: boolean;
+      licenseUrl: string;
+      header: string;
+      token: string;
+      certificateUrl: string;
+    };
   };
   analytics?: {
     videoId: string;

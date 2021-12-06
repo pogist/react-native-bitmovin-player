@@ -9,6 +9,7 @@ import com.bitmovin.analytics.bitmovin.player.BitmovinPlayerCollector;
 import com.bitmovin.player.PlayerView;
 import com.bitmovin.player.api.Player;
 import com.bitmovin.player.api.PlayerConfig;
+import com.bitmovin.player.api.drm.WidevineConfig;
 import com.bitmovin.player.api.event.PlayerEvent;
 import com.bitmovin.player.api.media.subtitle.SubtitleTrack;
 import com.bitmovin.player.api.media.thumbnail.ThumbnailTrack;
@@ -46,6 +47,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private PlayerView _playerView;
   private Player _player;
   private boolean _fullscreen;
+  private boolean _PiP;
   private ThemedReactContext _reactContext;
   private Integer heartbeat = 30;
   private Double offset = 0.0;
@@ -53,7 +55,8 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
   private boolean customSeek = false;
   private ReadableMap configuration = null;
   private final PlayerConfig playerConfig = new PlayerConfig();
-  private HashMap metaDataMap = new HashMap();
+  private HashMap<String, String> metaDataMap = new HashMap<String, String>();
+  private boolean playerShouldPause = true;
 
   @NotNull
   @Override
@@ -169,6 +172,27 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
         )
       )
       .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPAvailabilityChanged")
+        )
+      )
+      .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPEnter")
+        )
+      )
+      .put(
+        "onPiPEnter",
+        MapBuilder.of(
+          "phasedRegistrationNames",
+          MapBuilder.of("bubbled", "onPiPExit")
+        )
+      )
+      .put(
         "onSeek",
         MapBuilder.of(
           "phasedRegistrationNames",
@@ -269,6 +293,7 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
       map.putString("volume", String.valueOf(_player.getVolume()));
       map.putString("duration", String.valueOf(_player.getDuration()));
       _player.seek(_player.getCurrentTime() + 10);
+
       customSeek = true;
       try {
         _reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
@@ -460,6 +485,27 @@ public class ReactNativeBitmovinPlayerManager extends SimpleViewManager<PlayerVi
 
       if (config.hasKey("startOffset")) {
         sourceConfig.getOptions().setStartOffset(config.getDouble("startOffset"));
+      }
+
+      if (config.getMap("drm") != null) {
+        String drmConf = Objects.requireNonNull(config.getMap("drm")).toString();
+        try {
+          JSONObject drmMapObj = new JSONObject(drmConf);
+          String drmNativeMap = drmMapObj.getJSONObject("NativeMap").toString();
+          JSONObject drm = new JSONObject(drmNativeMap);
+          if (drm.getString("isDrmEn").equals("true")) {
+            String licenseUrl = drm.getString("licenseUrl");
+            String drmHeader = drm.getString("header");
+            String drmToken = drm.getString("token");
+            HashMap<String, String> drmWVConfigHeader = new HashMap<>();
+            drmWVConfigHeader.put(drmHeader, drmToken);
+            WidevineConfig widevineConfig = new WidevineConfig(licenseUrl);
+            widevineConfig.setHttpHeaders(drmWVConfigHeader);
+            sourceConfig.setDrmConfig(widevineConfig);
+          }
+        } catch (JSONException e) {
+          e.printStackTrace();
+        }
       }
 
       Source source = Source.create(sourceConfig);

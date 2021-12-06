@@ -22,6 +22,7 @@ final class ViewController: UIView {
     var zoom: Bool = false
     var offset: TimeInterval = 0
     var hearbeat: Int = 10
+    var drm: NSDictionary? = nil
 
     fileprivate var customMessageHandler: CustomMessageHandler?
     // Create player configuration
@@ -82,6 +83,42 @@ final class ViewController: UIView {
 
         if (self.autoPlay == true){
             config.playbackConfiguration.isAutoplayEnabled = true;
+        }
+
+        if((self.configuration!["drm"]) != nil) {
+            drm = self.configuration!["drm"] as? NSDictionary;
+            if (drm?.value(forKey: "isDrmEn") as! Bool == true) {
+                let licenseURL = URL.init(string: (drm?.value(forKey: "licenseUrl") as! String))
+                let certificateURL = URL.init(string: (drm?.value(forKey: "certificateUrl") as! String))
+                // create drm configuration
+                let fpsConfig = FairplayConfiguration(license: licenseURL!, certificateURL: certificateURL!)
+                // Example of how certificate data can be prepared if custom modifications are needed
+                fpsConfig.prepareCertificate = { (data: Data) -> Data in
+                    // Do something with the loaded certificate
+                    return data
+                }
+                fpsConfig.licenseRequestHeaders = [
+                    "content-type": "application/octet-stream",
+                    (drm?.value(forKey: "header") as! String): (drm?.value(forKey: "token") as! String)
+                ]
+
+                fpsConfig.prepareMessage = { spcData, assetId in
+                    spcData
+                }
+                fpsConfig.prepareLicense = { ckc in
+                     ckc
+                }
+
+                fpsConfig.prepareContentId = { contentId in
+                    let ret = contentId.components(separatedBy: "/").last ?? contentId
+                    return ret
+                }
+
+                fpsConfig.prepareSyncMessage = { spcData, assetId in
+                    spcData
+                }
+                config.sourceItem?.add(drmConfiguration: fpsConfig)
+            }
         }
 
         player?.setup(configuration: config)

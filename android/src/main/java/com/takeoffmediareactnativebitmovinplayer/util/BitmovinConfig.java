@@ -22,12 +22,10 @@ import com.bitmovin.player.api.media.AdaptationConfig;
 import com.bitmovin.player.api.media.MediaFilter;
 import com.bitmovin.player.api.ui.ScalingMode;
 import com.bitmovin.player.api.ui.StyleConfig;
-import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.DynamicFromObject;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
